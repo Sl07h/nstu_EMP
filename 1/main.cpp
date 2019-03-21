@@ -10,6 +10,39 @@ using namespace std;
 typedef double real;
 
 
+struct NODE {
+
+	int number, i, j;
+	real x, y;
+	real value;			// значение u
+	int type = -9000;	// -9000	начение при инициализации
+						// -1		фиктивный узел
+						// 0		внутренний узел
+						// n		номер границы
+
+	enum {
+		FICTIRIOUS,		// Фиктивный узел
+		INNER,			// Внутренний узел
+		FIRST,			// f(x,y) = g(x, y)
+		SECOND,			// f'(x,y) = g(x, y)
+		THIRD,			// f'(x, y) + C1 * f(x, y) = C2 = 0
+	} conditionType;
+};
+
+
+class GRID
+{
+public:
+	void inputGrid(const char *filename);
+	void buildGrid();
+
+
+
+private:
+	vector <real> nodes;
+};
+
+
 // Класс МКР. L-образная область.
 class FDM
 {
@@ -40,34 +73,25 @@ private:
 };
 
 
-// Функция правой части
-real FDM::f(real x, real y)
-{
-	real f;
-	// Test 1,2,3
-	//f = 2.0 * x + 2.0 * y;
-	// Test 4
-	//f = 2.0 * pow(x,2) + 2.0 * pow(y,2) - 4.0;
-	// Test 5
-	//f = 2.0 * pow(x,3) + 2.0 * pow(y,3) - 6.0 * x - 6.0 * y;
-	// Test 6
-	//f = 2.0 * pow(x,4) + 2.0 * pow(y,4) - 12.0 * pow(x,2) - 12.0 * pow(y,2);
-	// Test 7
-	f = 9.0 * cos(2.0 * x + 2.0 * y);
-	return f;
-}
+
 
 
 // Задаём искомую функцию  u
-real FDM::u(real i, real j)
+real FDM::u(real x, real y)
 {
 	real u;
-	real x = xLeft + (xRight - xLeft) * i / width;
-	real y = yLower + (yUpper - yLower) * j / heigth;
-
-	u = x + y;
+	u = x * x*x + y * y*y;
 
 	return u;
+}
+
+real FDM::f(real i, real j)
+{
+
+	real x = xLeft + (xRight - xLeft) * i / width;
+	real y = yLower + (yUpper - yLower) * j / heigth;
+	return 6 * (x + y);
+
 }
 
 
@@ -129,12 +153,12 @@ void FDM::outputSLAE(const char * fileA, const char * fileB)
 		for (size_t j = 0; j < elemCount; j++)
 			foutA << A[i][j] << "\t";
 
-		foutA << endl;
+		foutA << ";" << endl;
 	}
 
 	for (size_t i = 0; i < elemCount; i++)
 	{
-		foutB << b[i] << endl;
+		foutB << b[i] << ";" << endl;
 	}
 }
 
@@ -174,7 +198,7 @@ void FDM::transformToSLAE()
 			A[elem][elem + 1] = 1 / (hx * hx);
 			A[elem][elem - width] = 1 / (hy * hy);
 			A[elem][elem + width] = 1 / (hy * hy);
-			b[elem] = u(i, j);
+			b[elem] = f(i, j);
 			cout << elem << "\t";
 		}
 		cout << endl;
@@ -190,7 +214,7 @@ void FDM::transformToSLAE()
 		A[elem][elem + 1] = 1 / (hx * hx);
 		A[elem][elem - width] = 1 / (hy * hy);
 		A[elem][elem + width] = 1 / (hy * hy);
-		b[elem] = u(i, j);
+		b[elem] = f(i, j);
 		cout << elem << "\t";
 	}
 	cout << endl;
@@ -207,7 +231,7 @@ void FDM::transformToSLAE()
 			A[elem][elem + 1] = 1 / (hx * hx);
 			A[elem][elem - width] = 1 / (hy * hy);
 			A[elem][elem + width] = 1 / (hy * hy);
-			b[elem] = u(i, j);
+			b[elem] = f(i, j);
 			cout << elem << "\t";
 		}
 		cout << endl;
@@ -216,10 +240,11 @@ void FDM::transformToSLAE()
 	// 1
 	i = 0;
 	j = 0;
-	for (elem = 0; elem < heigth - 1; elem += width, j++)
+	for (elem = 0; elem < (heigth - 1) * width; elem += width, j++)
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// 2
@@ -229,6 +254,7 @@ void FDM::transformToSLAE()
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// 3
@@ -238,6 +264,7 @@ void FDM::transformToSLAE()
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// 4
@@ -247,6 +274,7 @@ void FDM::transformToSLAE()
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// 5
@@ -256,26 +284,30 @@ void FDM::transformToSLAE()
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// 6
 	i = 0;
 	j = heigth - 1;
-	for (elem = width * j; elem < width * j + heigthLower - 1; elem++, i++)
+	for (elem = width * j; elem < width * j + widthLeft - 1; elem++, i++)
 	{
 		A[elem][elem] = 1;
 		b[elem] = u(i, j);
+		cout << elem << "\t";
 	}
 
 	// fictitious nodes
 	for (j = heigthLower; j < heigth; j++)
 	{
 		i = widthLeft;
-		for (elem = widthLeft; elem < width; elem++)
+		for (elem = width * j + widthLeft; elem < width * (j + 1); elem++)
 		{
 			A[elem][elem] = 1;
 			b[elem] = 0;
+			cout << elem << "\t";
 		}
+		cout << endl;
 	}
 }
 
