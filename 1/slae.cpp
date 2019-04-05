@@ -109,6 +109,20 @@ void SLAE::writeDenseMatrixToFile(const string & filename) {
 	fout.close();
 }
 
+void SLAE::writeSecondDenseMatrixToFile(const string & filename)
+{
+	std::ofstream fout;
+	fout.open(filename);
+
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j)
+			fout << A2[i][j] << "\t";
+		fout << endl;
+	}
+
+	fout.close();
+}
+
 
 // Умножение i-й строки матрицы на вектор
 double SLAE::multLine(vector <double> &line, int i, int mode) {
@@ -221,6 +235,7 @@ int SLAE::calcIterative(int mode, double w) {
 
 		++i;
 	}
+	cout << i << endl;
 
 	return i;
 }

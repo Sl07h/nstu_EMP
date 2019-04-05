@@ -11,7 +11,7 @@ public:
 
 	void convMatrixToDense();
 	void writeDenseMatrixToFile(const string &filename);
-
+	void writeSecondDenseMatrixToFile(const string &filename);
 	double multLine(vector<double>& line, int i, int mode);
 	void mult();
 
@@ -22,7 +22,7 @@ public:
 
 
 protected:
-	vector <vector <double>> A;
+	vector <vector <double>> A, A2;
 	vector <double> di, au1, au2, al1, al2;
 	vector <double> x, b;
 	int n, m, maxiter;
