@@ -43,20 +43,20 @@ void SLAE::inputSLAEParameters()
 }
 
 // Вывод вектора X в файл 
-void SLAE::writeXToFile(const string &filename) {
+void SLAE::writeXToFile(const string &filepath) {
 
 	std::ofstream fout;
-	fout.open(filename);
+	fout.open(filepath);
 
 	for (int i = 0; i < x.size(); ++i)
 		fout << x[i] << endl;
 	fout.close();
 }
 
-void SLAE::writebToFile(const string & filename) {
+void SLAE::writebToFile(const string & filepath) {
 
 	std::ofstream fout;
-	fout.open(filename);
+	fout.open(filepath);
 
 	for (int i = 0; i < x.size(); ++i)
 		fout << b[i] << endl;
@@ -95,10 +95,10 @@ void SLAE::convMatrixToDense() {
 
 
 // Вывод плотной матрицы в файл
-void SLAE::writeDenseMatrixToFile(const string & filename) {
+void SLAE::writeDenseMatrixToFile(const string & filepath) {
 
 	std::ofstream fout;
-	fout.open(filename);
+	fout.open(filepath);
 	
 	for (int i = 0; i < n;++i) {
 		for (int j = 0; j < n; ++j)
@@ -109,10 +109,10 @@ void SLAE::writeDenseMatrixToFile(const string & filename) {
 	fout.close();
 }
 
-void SLAE::writeSecondDenseMatrixToFile(const string & filename)
+void SLAE::writeSecondDenseMatrixToFile(const string & filepath)
 {
 	std::ofstream fout;
-	fout.open(filename);
+	fout.open(filepath);
 
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < n; ++j)
@@ -224,18 +224,17 @@ void SLAE::GaussSeildel(double w) {
 // Решение СЛАУ итерационным методом
 // 1  Метод Якоби
 // 2  Метод Гаусса-Зейделя
-int SLAE::calcIterative(int mode, double w) {
+int SLAE::calcIterative(int useJacopbNotGaussSeidel, double w) {
 	int i = 0;
 	while (i < maxiter && calcRelativeDiscrepancy() >= E) {
 
-		if (mode == 1)
+		if (useJacopbNotGaussSeidel)
 			Jacobi(w);
 		else
 			GaussSeildel(w);
 
 		++i;
 	}
-	cout << i << endl;
 
 	return i;
 }
@@ -266,6 +265,8 @@ double SLAE::findOptimalW(int mode) {
 	
 	return optimalW;
 }
+
+
 
 
 // Вычисление нормы в Евклидовом пространстве

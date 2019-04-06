@@ -2,8 +2,6 @@
 #include "head.h"
 
 
-
-
 struct NODE {
 
 	int i, j;
@@ -29,14 +27,15 @@ class GRID
 public:
 	void inputGrid();
 	void buildGrid();
+	void showGrid();
+	void saveGridAndBorder(const string &filepathGrid, const string &filepathGridBorder);
 
 protected:
 	bool isGridUniform;
 	int condType, coef;
 	int width, heigth, widthLeft, widthRight, heigthLower, heigthUpper, elemCount;
 	double xLeft, xRight, yLower, yUpper;
-	double hx, hy, hxPrev, hyPrev;			// Приращение по осям ox и oy у равномерной сетки
-	double stepX0, stepY0;					// x_0, y_0
-	double dx, dy;							// x_n = x_0 + dx*(n-1), y_n = y_0 + dy*(n-1) арифметическая прогрессия
+	double hx, hy, nx, ny, kx, ky, hxPrev, hyPrev;			// Приращение по осям ox и oy у равномерной сетки
+	double dx, dy;							// hx_n = hx_1 + kx^(n-1) геометрическая прогрессия
 	vector <NODE> nodes;
 };

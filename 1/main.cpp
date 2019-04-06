@@ -18,49 +18,63 @@ void performSingleTest(function2D &u, function2D&f, int index, bool isGridUnifor
 	fdm.inputSLAEParameters();
 	fdm.inputGrid();
 	fdm.buildGrid();
+	fdm.showGrid();
 
 	fdm.transformGridToSLAE();
 	fdm.convMatrixToDense();
-	//fdm.outputSLAE("report/SLAE_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt");
+	//fdm.outputSLAE("tables/SLAE_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt");
 	double w = fdm.findOptimalW(method);
 	cout << "Optimal w = " << w << endl;
-	//fdm.writeDenseMatrixToFile("report/A.txt");
-	//fdm.writeSecondDenseMatrixToFile("report/A2.txt");
+	//fdm.writeDenseMatrixToFile("tables/A.txt");
+	//fdm.writeSecondDenseMatrixToFile("tables/A2.txt");
 	if (isGridUniform)
-		fout << fdm.calcAbsResidual("report/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
+		fout << fdm.calcAbsResidual("tables/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
 	else
-		fout << fdm.calcAbsResidual("report/NonUniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
+		fout << fdm.calcAbsResidual("tables/NonUniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
 
 	cout << endl;
 }
 
 
-void exploreConvergence(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, int method) {
+void exploreConvergence(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, bool useJacopbNotGaussSeidel, bool doVisualisation) {
 
 	ofstream fout;
-	if (isGridUniform)
-		fout.open("report/UniformConvergence" + to_string(index) + "_" + to_string(condNumber) + ".txt");
-	else
-		fout.open("report/NonUniformConvergence" + to_string(index) + "_" + to_string(condNumber) + ".txt");
+	string prefix = "";
+	if (!isGridUniform)
+		prefix = "Non";
+
+	fout.open("tables/Convergence" + prefix + "Uniform" + to_string(index) + "_" + to_string(condNumber) + ".txt");
 
 
-	for (size_t coef = 0; coef < 3; coef++)
+	for (size_t coef = 0; coef < 4; coef++)
 	{
+		string gridFile = "grids/" + prefix + "Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + ".txt";
+		string gridBorderFile = "grids/Border" + prefix + "Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + ".txt";
+		string absResidualFile = "tables/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + "_AbsResidual.txt";
+
 		FDM fdm;
 		fdm.init(u, f, isGridUniform, condNumber, coef);
 		fdm.inputEquationParameters();
 		fdm.inputSLAEParameters();
 		fdm.inputGrid();
 		fdm.buildGrid();
+		//fdm.showGrid();
 
 		fdm.transformGridToSLAE();
 		fdm.convMatrixToDense();
-		double w = fdm.findOptimalW(method);
-		cout << "Optimal w = " << w << endl;
-		if (isGridUniform)
-			fout << fdm.calcAbsResidual("report/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
-		else
-			fout << fdm.calcAbsResidual("report/NonUniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
+		//fdm.outputSLAE("tables/Uniform_" + to_string(index) + "_A.txt");
+		fdm.generateInitualGuess();
+		cout << "Count of steps: " << fdm.calcIterative(useJacopbNotGaussSeidel, 0.8) << endl << endl;
+
+
+		fdm.checkAnswer();
+
+		fdm.saveGridAndBorder(gridFile, gridBorderFile);
+		fout << fdm.calcAbsResidual(absResidualFile) << endl;
+		if (doVisualisation) {
+			string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
+			system(runVisualisation.c_str());
+		}
 	}
 
 	fout.close();
@@ -72,7 +86,6 @@ int main() {
 
 	int testsCount = 7;
 	bool isGridUniform;
-
 
 	vector <function2D> function_u(testsCount), function_f(testsCount);
 	function_u[0] = { [](double x, double y) -> double { return x + y; } };
@@ -96,23 +109,26 @@ int main() {
 	function_u[6] = { [](double x, double y) -> double { return exp(x + y); } };
 	function_f[6] = { [](double x, double y) -> double { return 2 * exp(x + y); } };
 
-	int i = 2;
-	exploreConvergence(function_u[i], function_f[i], i, true, 1, 1);
 
-	ofstream fout("report/table.txt");
-	fout << setprecision(numeric_limits<double>::digits10 + 1) << fixed;
-	//for (size_t i = 0; i < testsCount - 3; i++) {
+	//cout << setprecision(1) << fixed;
+	//int i = 0;
+	//exploreConvergence(function_u[i], function_f[i], i, true, 1, true, true);
+	//exploreConvergence(function_u[i], function_f[i], i, false, 1, true, true);
+	//exploreConvergence(function_u[i], function_f[i], i, true, 3, true, true);
+	//exploreConvergence(function_u[i], function_f[i], i, false, 3, true, true);
 
-	//	exploreConvergence(function_u[i], function_f[i], i, true, 1, 1);
+	//ofstream fout("tables/table.txt");
+	//fout << setprecision(numeric_limits<double>::digits10 + 1) << fixed;
+	
+	for (size_t i = 0; i < testsCount - 3; i++) {
 
-	//	//performSingleTest(function_u[i], function_f[i], i, true, 3, 1, fout);
-	//	//performSingleTest(function_u[i], function_f[i], i, true, 1, 1, fout);
+		exploreConvergence(function_u[i], function_f[i], i, true, 1, true, true);
+		exploreConvergence(function_u[i], function_f[i], i, false, 1, true, true);
+		exploreConvergence(function_u[i], function_f[i], i, true, 3, true, true);
+		exploreConvergence(function_u[i], function_f[i], i, false, 3, true, true);
+	}
 
-	//	//performSingleTest(function_u[i], function_f[i], i, true, 3, 1);
-	//	//performSingleTest(function_u[i], function_f[i], i, false, 3, 1);
-	//}
-
-	fout.close();
+	//fout.close();
 
 	return 0;
 }

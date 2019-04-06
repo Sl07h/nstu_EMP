@@ -4,7 +4,6 @@
 #include "grid.h"
 
 
-
 // Класс МКР. L-образная область.
 class FDM : public GRID, public SLAE
 {
@@ -13,9 +12,14 @@ public:
 	void inputEquationParameters();
 	void outputSLAE(const string &fileA);
 	void transformGridToSLAE();
-	double calcAbsResidual(const string &filename);
+	double calcAbsResidual(const string &filepath);
+
+	void checkAnswer();
+
+
 
 private:
+	vector <double> xExp;
 	double lambda = 1, gamma = 1;					// коэффициенты диффуров
 	double C1 = 5, C2 = 0;
 	

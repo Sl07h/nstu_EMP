@@ -6,18 +6,18 @@ class SLAE {
 public:
 	void inputSLAEParameters();
 	void generateInitualGuess() { x.clear(); x.resize(n, 0); }
-	void writeXToFile(const string &filename);
-	void writebToFile(const string &filename);
+	void writeXToFile(const string &filepath);
+	void writebToFile(const string &filepath);
 
 	void convMatrixToDense();
-	void writeDenseMatrixToFile(const string &filename);
-	void writeSecondDenseMatrixToFile(const string &filename);
+	void writeDenseMatrixToFile(const string &filepath);
+	void writeSecondDenseMatrixToFile(const string &filepath);
 	double multLine(vector<double>& line, int i, int mode);
 	void mult();
 
 	void Jacobi(double w);
 	void GaussSeildel(double w);
-	int calcIterative(int mode, double w);
+	int calcIterative(int useJacopbNotGaussSeidel, double w);
 	double findOptimalW(int mode);
 
 

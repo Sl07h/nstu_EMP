@@ -32,7 +32,7 @@ void FDM::outputSLAE(const string & fileA)
 {
 	ofstream foutA(fileA);
 
-	//foutA << "A = [ ";
+	foutA << "A = [ ";
 	for (size_t i = 0; i < elemCount; i++)
 	{
 		for (size_t j = 0; j < elemCount; j++)
@@ -41,7 +41,7 @@ void FDM::outputSLAE(const string & fileA)
 		foutA << ";" << endl;
 	}
 
-	//foutA << "b = [ ";
+	foutA << endl << endl << endl << "b = [ ";
 	for (size_t i = 0; i < elemCount; i++)
 	{
 		foutA << b[i] << ";" << endl;
@@ -71,9 +71,6 @@ void FDM::transformGridToSLAE()
 
 
 	if (isGridUniform) {
-
-		cout << "Grid is uniform" << endl;
-		cout << hx << "\t" << hy << endl;
 
 		for (size_t elem = 0; elem < elemCount; elem++)
 		{
@@ -121,7 +118,7 @@ void FDM::transformGridToSLAE()
 				case 1: {
 					au1[elem] = 1.0 / hx;
 					di[elem] = -1.0 / hx + C1;
-					 
+
 					A2[elem][elem + 1] = 1.0 / hx;
 					A2[elem][elem] = -1.0 / hx + C1;
 					b[elem] = calcFirstDerivativeX(x, y) + C1 * u(x, y) + C2;
@@ -144,7 +141,6 @@ void FDM::transformGridToSLAE()
 	}
 	else {
 
-		cout << "Grid is nonuniform" << endl;
 		for (size_t elem = 0; elem < elemCount; elem++)
 		{
 			int i = nodes[elem].i;
@@ -222,7 +218,6 @@ void FDM::transformGridToSLAE()
 			}break;
 			}
 		}
-
 	}
 }
 
@@ -523,9 +518,9 @@ void FDM::transformGridToSLAE()
 
 
 // Абсолютная невязка
-double FDM::calcAbsResidual(const string &filename) {
+double FDM::calcAbsResidual(const string &filepath) {
 
-	ofstream fout(filename);
+	ofstream fout(filepath);
 	double tmp = 0.0, normAbsRes = 0.0;
 
 	for (size_t elem = 0; elem < elemCount; elem++)
@@ -541,4 +536,24 @@ double FDM::calcAbsResidual(const string &filename) {
 
 	fout.close();
 	return sqrt(normAbsRes);
+}
+
+
+void FDM::checkAnswer() {
+
+	ifstream fin("tables/x.txt");
+	ofstream fout("tables/abs_res.txt");
+
+	xExp.resize(elemCount);
+	for (size_t i = 0; i < elemCount; i++)
+	{
+		fin >> xExp[i];
+		if (nodes[i].type == -1)
+			fout << 0 << endl;
+		else
+			fout << (xExp[i] - u(nodes[i].x, nodes[i].y)) << endl;
+	}
+
+	fin.close();
+	fout.close();
 }
