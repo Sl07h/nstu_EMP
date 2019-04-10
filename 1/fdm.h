@@ -20,8 +20,8 @@ public:
 
 private:
 	vector <double> xExp;
-	double lambda = 1, gamma = 1;					// коэффициенты диффуров
-	double C1 = 5, C2 = 0;
+	double lambda = 1, gamma = 1;	// коэффициенты диффуров
+	double C1 = 5, C2 = 5;
 	
 	function2D u, f;
 

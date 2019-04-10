@@ -1,42 +1,31 @@
 #include "fdm.h"
 
 
-//#include <Eigen/Eigen>
-//#include <Eigen/Dense>
-// Включаемые каталоги
-// C:\Users\User\Desktop\eigen-eigen-323c052e1731
-//typedef Eigen::MatrixXd Matrix;
-//typedef Eigen::VectorXd Vector;
-
 
 // Исследование работы МКР на функциях u,f
-void performSingleTest(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, int method, ofstream &fout) {
+double performSingleTest(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, bool useJacopbNotGaussSeidel, int coef = 0) {
+
+	string absResidualFile = "tables/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + "_AbsResidual.txt";
 
 	FDM fdm;
-	fdm.init(u, f, isGridUniform, condNumber, 1);
+	fdm.init(u, f, isGridUniform, condNumber, coef);
 	fdm.inputEquationParameters();
 	fdm.inputSLAEParameters();
 	fdm.inputGrid();
 	fdm.buildGrid();
-	fdm.showGrid();
-
+	//fdm.showGrid();
 	fdm.transformGridToSLAE();
 	fdm.convMatrixToDense();
-	//fdm.outputSLAE("tables/SLAE_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt");
-	double w = fdm.findOptimalW(method);
-	cout << "Optimal w = " << w << endl;
-	//fdm.writeDenseMatrixToFile("tables/A.txt");
-	//fdm.writeSecondDenseMatrixToFile("tables/A2.txt");
-	if (isGridUniform)
-		fout << fdm.calcAbsResidual("tables/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
-	else
-		fout << fdm.calcAbsResidual("tables/NonUniform_" + to_string(index) + "_" + to_string(condNumber) + "_AbsResidual.txt") << endl;
-
-	cout << endl;
+	//fdm.outputSLAE("tables/Uniform_" + to_string(index) + "_A.txt");
+	fdm.generateInitualGuess();
+	cout << "Count of steps: " << fdm.calcIterative(useJacopbNotGaussSeidel, 0.8) << endl << endl;
+	return fdm.calcAbsResidual(absResidualFile);
 }
 
 
-void exploreConvergence(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, bool useJacopbNotGaussSeidel, bool doVisualisation) {
+
+// Исследование сходимости при дроблении сетки
+void exploreConvergence(function2D &u, function2D&f, int index, bool isGridUniform, int condNumber, bool useJacopbNotGaussSeidel) {
 
 	ofstream fout;
 	string prefix = "";
@@ -44,41 +33,45 @@ void exploreConvergence(function2D &u, function2D&f, int index, bool isGridUnifo
 		prefix = "Non";
 
 	fout.open("tables/Convergence" + prefix + "Uniform" + to_string(index) + "_" + to_string(condNumber) + ".txt");
+	fout << std::scientific;
 
-
+	// Увеличиваем сетку в kx^coef раз
 	for (size_t coef = 0; coef < 4; coef++)
-	{
-		string gridFile = "grids/" + prefix + "Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + ".txt";
-		string gridBorderFile = "grids/Border" + prefix + "Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + ".txt";
-		string absResidualFile = "tables/Uniform_" + to_string(index) + "_" + to_string(condNumber) + "_" + to_string(coef) + "_AbsResidual.txt";
-
-		FDM fdm;
-		fdm.init(u, f, isGridUniform, condNumber, coef);
-		fdm.inputEquationParameters();
-		fdm.inputSLAEParameters();
-		fdm.inputGrid();
-		fdm.buildGrid();
-		//fdm.showGrid();
-
-		fdm.transformGridToSLAE();
-		fdm.convMatrixToDense();
-		//fdm.outputSLAE("tables/Uniform_" + to_string(index) + "_A.txt");
-		fdm.generateInitualGuess();
-		cout << "Count of steps: " << fdm.calcIterative(useJacopbNotGaussSeidel, 0.8) << endl << endl;
-
-
-		fdm.checkAnswer();
-
-		fdm.saveGridAndBorder(gridFile, gridBorderFile);
-		fout << fdm.calcAbsResidual(absResidualFile) << endl;
-		if (doVisualisation) {
-			string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
-			system(runVisualisation.c_str());
-		}
-	}
+		fout << performSingleTest(u, f, index, isGridUniform, condNumber, useJacopbNotGaussSeidel, coef) << endl;
 
 	fout.close();
 }
+
+
+
+// Отрисовка сетки
+void drawGrids(bool isGridUniform) {
+
+	string prefix = "";
+	if (!isGridUniform)
+		prefix = "Non";
+
+	function2D u = { [](double x, double y) -> double { return x + y; } };
+	function2D f = { [](double x, double y) -> double { return 0; } };
+
+	for (size_t coef = 0; coef < 4; coef++)
+	{
+		string gridFile = "grids/" + prefix + "Uniform_" + to_string(coef) + ".txt";
+		string gridBorderFile = "grids/Border" + prefix + "Uniform_" + to_string(coef) + ".txt";
+
+		FDM fdm;
+		fdm.init(u, f, isGridUniform, 1, coef);
+		//fdm.inputEquationParameters();
+		//fdm.inputSLAEParameters();
+		fdm.inputGrid();
+		fdm.buildGrid();
+		fdm.saveGridAndBorder(gridFile, gridBorderFile);
+
+		string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
+		system(runVisualisation.c_str());
+	}
+}
+
 
 
 
@@ -110,25 +103,37 @@ int main() {
 	function_f[6] = { [](double x, double y) -> double { return 2 * exp(x + y); } };
 
 
-	//cout << setprecision(1) << fixed;
-	//int i = 0;
-	//exploreConvergence(function_u[i], function_f[i], i, true, 1, true, true);
-	//exploreConvergence(function_u[i], function_f[i], i, false, 1, true, true);
-	//exploreConvergence(function_u[i], function_f[i], i, true, 3, true, true);
-	//exploreConvergence(function_u[i], function_f[i], i, false, 3, true, true);
+	// Таблица 0
+	// Отрисовка сеток
+	drawGrids(true);
+	drawGrids(false);
 
-	//ofstream fout("tables/table.txt");
-	//fout << setprecision(numeric_limits<double>::digits10 + 1) << fixed;
-	
-	for (size_t i = 0; i < testsCount - 3; i++) {
 
-		exploreConvergence(function_u[i], function_f[i], i, true, 1, true, true);
-		exploreConvergence(function_u[i], function_f[i], i, false, 1, true, true);
-		exploreConvergence(function_u[i], function_f[i], i, true, 3, true, true);
-		exploreConvergence(function_u[i], function_f[i], i, false, 3, true, true);
+
+	// Таблица 1
+	// Точность на разных функциях
+	/*std::ofstream fout1("tables/table1.txt");
+	std::ofstream fout3("tables/table3.txt");
+	fout1 << std::scientific;
+	fout3 << std::scientific;
+	for (size_t i = 0; i < testsCount; i++) {
+		fout1 << performSingleTest(function_u[i], function_f[i], i, true, 1, true, 0) << endl;
+		fout3 << performSingleTest(function_u[i], function_f[i], i, true, 3, true, 0) << endl;
 	}
+	fout1.close();
+	fout3.close();*/
 
-	//fout.close();
+
+	// Таблица 2
+	// Точность в зависимости от дробления сетки
+	/*for (size_t i = 0; i < testsCount; i++) {
+		exploreConvergence(function_u[i], function_f[i], i, true, 1, true);
+		exploreConvergence(function_u[i], function_f[i], i, false, 1, true);
+		exploreConvergence(function_u[i], function_f[i], i, true, 3, true);
+		exploreConvergence(function_u[i], function_f[i], i, false, 3, true);
+	}*/
+
+
 
 	return 0;
 }

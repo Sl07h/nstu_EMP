@@ -13,7 +13,3 @@ using namespace std;
 
 
 typedef std::function<double(double, double)> function2D;
-
-
-// https://en.wikipedia.org/wiki/Numerical_differentiation#Higher_Derivatives
-
