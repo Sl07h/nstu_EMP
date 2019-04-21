@@ -1,37 +1,144 @@
 #include "fem.h"
 
 
-// —ÚÓËÏ „ÎÓ·‡Î¸ÌÛ˛ Ï‡ÚËˆÛ ÒËÒÚÂÏ˚ ÌÂÎËÌÂÈÌ˚ı Û‡‚ÌÂÌËÈ
+// –ò–Ω–∏—Ü–∏–∞–ª–∏–∑–∏—Ä—É–µ–º –º–æ–¥–µ–ª—å, –∑–∞–¥–∞–≤–∞—è —Ñ—É–Ω–∫—Ü–∏–∏ u, f –∏ —Ç–∏–ø —Å–µ—Ç–∫–∏
+void FEM::init(function1D & _u, function1D & _f, bool _isGridUniform, bool _isTimeUniform, int _condType, int _coefGrid, int _coefTime)
+{
+	ifstream fin("input/SLAE_parameters.txt");
+	fin >> E >> delta >> maxiter;
+	fin.close();
+	u = _u;
+	f = _f;
+	isGridUniform = _isGridUniform;
+	isTimeUniform = _isTimeUniform;
+	condType = _condType;
+	coefGrid = _coefGrid;
+	coefTime = _coefTime;
+}
+
+
+
+// –†–µ—à–∞–µ–º –≤–æ –≤—Å–µ—Ö —É–∑–ª–∞—Ö –ø–æ –≤—Ä–µ–º–µ–Ω–∏
+void FEM::solve()
+{
+	ofstream fout("output/solution.txt");
+	// –ó–∞–¥–∞—ë–º –Ω–∞—á–∞–ª—å–Ω—ã–µ —É—Å–ª–æ–≤–∏—è
+	q.resize(nodesCount, 0);
+	qPrev.resize(nodesCount, 0);
+	for (size_t i = 0; i < nodesCount; i++)
+		qPrev[i] = u(nodes[i].x);
+
+
+	// –†–µ—à–∞–µ–º –≤ –∫–∞–∂–¥—ã–π –º–æ–º–µ–Ω—Ç –≤—Ä–µ–º–µ–Ω–Ω–æ–π —Å–µ—Ç–∫–∏
+	for (size_t i = 1; i < times.size(); i++)
+	{
+		dt = times[i] - times[i - 1];
+		double t = times[i];
+		
+		bool doCalculation = true;
+		while (doCalculation) {
+
+			buildGlobalMatrixA();
+			buildGlobalVectorb();
+			//printGlobalMatrixA();
+			//printGlobalVectorb();
+
+			calcWithLUDecomposition();
+			qPrev = q;
+
+			if (shouldCalc(i) == false) {
+				cout << "Iteration: " << i
+					<< "Time: " << t << endl;
+				fout << q << endl;
+				doCalculation = false;
+			}
+		}
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+
+// –°—Ç—Ä–æ–∏–º –≥–ª–æ–±–∞–ª—å–Ω—É—é –º–∞—Ç—Ä–∏—Ü—É —Å–∏—Å—Ç–µ–º—ã –Ω–µ–ª–∏–Ω–µ–π–Ω—ã—Ö —É—Ä–∞–≤–Ω–µ–Ω–∏–π
 void FEM::buildGlobalMatrixA()
 {
-	for (size_t elemNumber = 0; elemNumber < elemCount; elemNumber++)
+	A.resize(nodesCount);
+	for (size_t i = 0; i < nodesCount; i++)
+		A[i].resize(nodesCount, 0);
+
+	di.resize(nodesCount, 0);
+	al.resize(nodesCount - 1, 0);
+	au.resize(nodesCount - 1, 0);
+	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
 	{
 		buildLocalmatrixA(elemNumber);
-		di[elemNumber] = ALocal[0][0];
-		di[elemNumber + 1] = ALocal[0][1];
-		al[elemNumber] = ALocal[1][0];
-		au[elemNumber] = ALocal[0][1];
+
+		di[elemNumber] += ALocal[0][0];
+		di[elemNumber + 1] += ALocal[0][1];
+		al[elemNumber] += ALocal[1][0];
+		au[elemNumber] += ALocal[0][1];
+
+		A[elemNumber][elemNumber] += ALocal[0][0];
+		A[elemNumber][elemNumber + 1] += ALocal[0][1];
+		A[elemNumber + 1][elemNumber] += ALocal[1][0];
+		A[elemNumber + 1][elemNumber + 1] += ALocal[1][1];
 	}
 }
 
 
-// —ÚÓËÏ „ÎÓ·‡Î¸Ì˚È ‚ÂÍÚÓ Ô‡‚ÓÈ ˜‡ÒÚË ÒËÒÚÂÏ˚ ÌÂÎËÌÂÈÌ˚ı Û‡‚ÌÂÌËÈ
+
+// –°—Ç—Ä–æ–∏–º –≥–ª–æ–±–∞–ª—å–Ω—ã–π –≤–µ–∫—Ç–æ—Ä –ø—Ä–∞–≤–æ–π —á–∞—Å—Ç–∏ —Å–∏—Å—Ç–µ–º—ã –Ω–µ–ª–∏–Ω–µ–π–Ω—ã—Ö —É—Ä–∞–≤–Ω–µ–Ω–∏–π
 void FEM::buildGlobalVectorb()
 {
-	for (size_t elemNumber = 0; elemNumber < elemCount; elemNumber++)
+	b.resize(nodesCount, 0);
+
+	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
 	{
 		buildLocalVectorb(elemNumber);
-		b[elemNumber] = bLocal[elemNumber];
-		b[elemNumber + 1] = bLocal[elemNumber + 1];
+		b[elemNumber] += bLocal[0];
+		b[elemNumber + 1] += bLocal[1];
 	}
 }
 
 
 
+// –í—ã–≤–æ–¥ –º–∞—Ç—Ä–∏—Ü—ã –ê –≤ –∫–æ–Ω—Å–æ–ª—å
+void FEM::printGlobalMatrixA()
+{
+	cout << fixed << setprecision(2);
+	for (size_t i = 0; i < nodesCount; i++)
+	{
+		for (size_t j = 0; j < nodesCount; j++)
+		{
+			cout << A[i][j] << "\t";
+		}
+		cout << endl;
+	}
+}
 
 
 
-// œÓÒÚÓÂÌËÂ ÎÓÍ‡Î¸ÌÓÈ Ï‡ÚËˆ˚ Ê∏ÒÚÍÓÒÚË
+// –í—ã–≤–æ–¥ –º–∞—Ç—Ä–∏—Ü—ã –ê –≤ –∫–æ–Ω—Å–æ–ª—å
+void FEM::printGlobalVectorb()
+{
+	cout << endl << fixed << setprecision(2);
+	for (size_t i = 0; i < nodesCount; i++)
+	{
+		cout << b[i] << endl;
+	}
+}
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+
+// –ü–æ—Å—Ç—Ä–æ–µ–Ω–∏–µ –ª–æ–∫–∞–ª—å–Ω–æ–π –º–∞—Ç—Ä–∏—Ü—ã –∂—ë—Å—Ç–∫–æ—Å—Ç–∏
 void FEM::buildLocalMatrixG(int elemNumber)
 {
 	double numerator = (lambda0 + lambda1) / (2 * hx);
@@ -41,7 +148,7 @@ void FEM::buildLocalMatrixG(int elemNumber)
 
 
 
-// œÓÒÚÓÂÌËÂ ÎÓÍ‡Î¸ÌÓÈ Ï‡ÚËˆ˚ Ï‡ÒÒ
+// –ü–æ—Å—Ç—Ä–æ–µ–Ω–∏–µ –ª–æ–∫–∞–ª—å–Ω–æ–π –º–∞—Ç—Ä–∏—Ü—ã –º–∞—Å—Å
 void FEM::buildLocalMatrixM(int elemNumber)
 {
 	double numerator = (sigma * hx) / (6 * dt);
@@ -51,7 +158,7 @@ void FEM::buildLocalMatrixM(int elemNumber)
 
 
 
-// œÓÒÚÓÂÌËÂ ÎÓÍ‡Î¸ÌÓÈ Ï‡ÚËˆ˚ ¿
+// –ü–æ—Å—Ç—Ä–æ–µ–Ω–∏–µ –ª–æ–∫–∞–ª—å–Ω–æ–π –º–∞—Ç—Ä–∏—Ü—ã –ê
 void FEM::buildLocalmatrixA(int elemNumber)
 {
 	ALocal = GLocal = MLocal = { {0,0}, {0,0} };
@@ -68,12 +175,10 @@ void FEM::buildLocalmatrixA(int elemNumber)
 
 
 
-// œÓÒÚÓÂÌËÂ ÎÓÍ‡Î¸ÌÓ„Ó ‚ÂÍÚÓ‡ b
+// –ü–æ—Å—Ç—Ä–æ–µ–Ω–∏–µ –ª–æ–∫–∞–ª—å–Ω–æ–≥–æ –≤–µ–∫—Ç–æ—Ä–∞ b
 void FEM::buildLocalVectorb(int elemNumber)
 {
 	bLocal = { 0,0 };
-	bLocal[0] = f(elemNumber) * hx / 2 +
-				sigma * hx / (6 * dt) * (2 * qPrev[0] + qPrev[1]);
-	bLocal[1] = f(elemNumber + 1) * hx / 2 +
-				sigma * hx / (6 * dt) * (qPrev[0] + 2 * qPrev[1]);
+	bLocal[0] = f(nodes[elemNumber].x) * hx / 2 + sigma * hx / (6 * dt) * (2 * qPrev[0] + qPrev[1]);
+	bLocal[1] = f(nodes[elemNumber + 1].x) * hx / 2 + sigma * hx / (6 * dt) * (qPrev[0] + 2 * qPrev[1]);
 }

@@ -7,11 +7,11 @@ struct NODE {
 	bool isFirstNode = false;
 	int i;
 	double x;
-	int type = -9000;		// -9000	начение при инициализации
-							// -1		фиктивный узел
-							// 0		внутренний узел
-							// n		номер границы
-	int border;				// номер границы
+	int type = -9000;		// -9000	РЅР°С‡РµРЅРёРµ РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
+							// -1		С„РёРєС‚РёРІРЅС‹Р№ СѓР·РµР»
+							// 0		РІРЅСѓС‚СЂРµРЅРЅРёР№ СѓР·РµР»
+							// n		РЅРѕРјРµСЂ РіСЂР°РЅРёС†С‹
+	int border;				// РЅРѕРјРµСЂ РіСЂР°РЅРёС†С‹
 	double time;
 
 	void setNodesData(double _x, int _i, int _type, double _coef) {
@@ -31,29 +31,32 @@ public:
 	void inputGrid();
 	void inputTime();
 	void buildGrid();
+	void buildTimeGrid();
 	void showGrid();
 	void saveGridAndBorder(const string &filepathGrid, const string &filepathGridBorder);
 
 protected:
 
-	int coefGrid, // Сколько раз дробили сетку по пространству
-		coefTime; // Сколько раз дробили сетку по времени
+	int coefGrid, // РЎРєРѕР»СЊРєРѕ СЂР°Р· РґСЂРѕР±РёР»Рё СЃРµС‚РєСѓ РїРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ
+		coefTime; // РЎРєРѕР»СЊРєРѕ СЂР°Р· РґСЂРѕР±РёР»Рё СЃРµС‚РєСѓ РїРѕ РІСЂРµРјРµРЅРё
 
-	// Пространство
+	// РџСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ
 	bool isGridUniform;
 	int width;
 	double xLeft, xRight;
 	double hx, nx, kx, hxPrev;
 	double dx;
-	int elemCount;
+	int nodesCount, finiteElementsCount;
+	int condType;
 
-	// Время
+	// Р’СЂРµРјСЏ
 	bool isTimeUniform;
 	int tCount;
 	double tFirst, tLast;
 	double ht, nt, kt, htPrev;
-	double dt;
+	double dt = 1;
 
-	// Узлы
+	// РЈР·Р»С‹
 	vector <NODE> nodes;
+	vector1D times;
 };

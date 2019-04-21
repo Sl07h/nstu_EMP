@@ -29,7 +29,7 @@ void GRID::inputGrid()
 void GRID::inputTime()
 {
 	string filepath;
-	if (isGridUniform)
+	if (isTimeUniform)
 		filepath = "input/uniform_time.txt";
 	else
 		filepath = "input/nonuniform_time.txt";
@@ -40,7 +40,7 @@ void GRID::inputTime()
 
 	fin >> tCount;
 
-	if (!isGridUniform) {
+	if (!isTimeUniform) {
 		fin >> kt;
 		nt = tCount - 1;
 	}
@@ -76,13 +76,14 @@ void GRID::buildGrid()
 
 
 
-	elemCount = width;
+	nodesCount = width;
+	finiteElementsCount = nodesCount - 1;
 	cout << "Grid is uniform" << endl
 		<< "Coef: " << coefGrid << endl
 		<< "Width: " << width << endl
-		<< "Count of elements: " << elemCount << endl
+		<< "Count of elements: " << nodesCount << endl
 		<< "hx: " << hx << endl;
-	nodes.resize(elemCount);
+	nodes.resize(width);
 
 
 	if (isGridUniform) {
@@ -90,7 +91,7 @@ void GRID::buildGrid()
 		size_t i, elem;
 		double x;
 
-		// Ïåðâûé ýëåìåíò
+		// ÐŸÐµÑ€Ð²Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
 		nodes[0].setNodesData(xLeft, 0, 1, coefGrid);
 
 		i = 1;
@@ -101,8 +102,8 @@ void GRID::buildGrid()
 			nodes[elem].border = 0;
 		}
 
-		// Ïîñëåäíèé ýëåìåíò
-		nodes[elemCount - 1].setNodesData(xRight, width, 1, coefGrid);
+		// ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		nodes[nodesCount - 1].setNodesData(xRight, width, 1, coefGrid);
 	}
 
 	else {
@@ -114,7 +115,7 @@ void GRID::buildGrid()
 		dx = hx * kx;
 		x = xLeft + hx;
 
-		// Ïåðâûé ýëåìåíò
+		// ÐŸÐµÑ€Ð²Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
 		nodes[0].setNodesData(xLeft, 0, 1, coefGrid);
 
 		for (elem = 1; elem < width; elem++, i++, dx *= kx)
@@ -124,14 +125,76 @@ void GRID::buildGrid()
 			x += dx;
 		}
 
-		// Ïîñëåäíèé ýëåìåíò
-		nodes[elemCount - 1].setNodesData(xRight, width, 1, coefGrid);
+		// ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		nodes[nodesCount - 1].setNodesData(xRight, width, 1, coefGrid);
+	}
+}
+
+void GRID::buildTimeGrid()
+{
+	//  tFirst         tLast
+	//	  *-------------*
+	//    0    tCount   10
+
+
+	
+	times.resize(tCount);
+
+	if (isTimeUniform) {
+
+		ht = ((tLast - tFirst) / double(tCount - 1)) / pow(2, coefTime);
+		cout << ht << endl;
+		if (coefTime != 0)
+			width = (width - 1) * pow(2, coefTime) + 1;
+
+		size_t i, elem;
+		double t;
+
+		// ÐŸÐµÑ€Ð²Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		times[0] = tFirst;
+		i = 1;
+		
+		for (elem = 1; elem < tCount; elem++, i++)
+			times[elem] = tFirst + ht * i;
+
+		// ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		times[tCount - 1] = tLast;
+	}
+
+	else {
+
+		if (coefTime != 0) {
+			width = (width - 1) * pow(2, coefTime) + 1;
+			nt *= pow(2, coefTime);
+			kt *= pow(kt, 1.0 / coefTime);
+		}
+
+		ht = (tLast - tFirst) * (1 - kt) / (1 - pow(kt, nt));
+
+		double t;
+		size_t i, elem;
+
+		i = 1;
+		dt = ht * kt;
+		t = tFirst + ht;
+
+		// ÐŸÐµÑ€Ð²Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		times[0] = tFirst;
+
+		for (elem = 1; elem < tCount; elem++, i++, dt *= kt)
+		{
+			times[elem] = t;
+			t += dt;
+		}
+
+		// ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
+		times[tCount - 1] = tLast;
 	}
 }
 
 
 
-// Îòîáðàæíèå ñåòêè íà ýêðàí
+// ÐžÑ‚Ð¾Ð±Ñ€Ð°Ð¶Ð½Ð¸Ðµ ÑÐµÑ‚ÐºÐ¸ Ð½Ð° ÑÐºÑ€Ð°Ð½
 void GRID::showGrid() {
 
 	for (size_t i = 0; i < width; i++)
@@ -140,12 +203,12 @@ void GRID::showGrid() {
 
 
 
-// Ñîõðàíåíèå âíóòðåííèõ è âíåøíèõ óçëîâ â 2 ôàéëàõ
+// Ð¡Ð¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ðµ Ð²Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½Ð¸Ñ… Ð¸ Ð²Ð½ÐµÑˆÐ½Ð¸Ñ… ÑƒÐ·Ð»Ð¾Ð² Ð² 2 Ñ„Ð°Ð¹Ð»Ð°Ñ…
 void GRID::saveGridAndBorder(const string &filepathGrid, const string &filepathGridBorder) {
 
 	ofstream grid(filepathGrid);
 	ofstream border(filepathGridBorder);
-	for (size_t i = 0; i < elemCount; i++)
+	for (size_t i = 0; i < nodesCount; i++)
 	{
 		if (nodes[i].type > 0)
 			border << nodes[i].x << endl;

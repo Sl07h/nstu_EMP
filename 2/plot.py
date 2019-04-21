@@ -12,7 +12,7 @@ data = []
 folder = 'pics/'
 grids = 'grids/'
 
-# Считывание хода метода
+# РЎС‡РёС‚С‹РІР°РЅРёРµ С…РѕРґР° РјРµС‚РѕРґР°
 def inputGrid(path):
 	global x_inside
 	global data
@@ -25,7 +25,7 @@ def inputGrid(path):
 		x_inside.append(data[i][0])
 
 
-# Считывание хода метода
+# РЎС‡РёС‚С‹РІР°РЅРёРµ С…РѕРґР° РјРµС‚РѕРґР°
 def inputBorder(path):
 	global x_border
 	global data
@@ -38,7 +38,7 @@ def inputBorder(path):
 		x_border.append(data[i][0])
 
 
-# Отрисовка хода метода
+# РћС‚СЂРёСЃРѕРІРєР° С…РѕРґР° РјРµС‚РѕРґР°
 def draw_line(title):
 	#plt.plot(x_border, y_border, linewidth=1)
 	plt.title(title, fontsize=19)
