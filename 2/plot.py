@@ -70,9 +70,9 @@ def drawGrid(grid, border):
 	#cs = pylab.contour(x, y, z, 25)
 	draw_line(name + str(len(x_inside)+len(x_border))+' nodes')
 	for i in range(len(x_inside)):
-		plt.scatter(x_inside[i], 0, s=2, marker='s', color='grey')
+		plt.scatter(x_inside[i], 0, s=4, marker='s', color='grey')
 	for i in range(len(x_border)):
-		plt.scatter(x_border[i], 0, s=2, marker='s', color='black')
+		plt.scatter(x_border[i], 0, s=4, marker='s', color='black')
 	plt.savefig(folder + grid[6:] + '.png')
 	#plt.show()
 	plt.clf()

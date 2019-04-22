@@ -59,7 +59,6 @@ void GRID::buildGrid()
 
 	if (isGridUniform) {
 		hx = ((xRight - xLeft) / double(width - 1)) / pow(2, coefGrid);
-		cout << hx << endl;
 		if (coefGrid != 0)
 			width = (width - 1) * pow(2, coefGrid) + 1;
 	}
@@ -78,11 +77,6 @@ void GRID::buildGrid()
 
 	nodesCount = width;
 	finiteElementsCount = nodesCount - 1;
-	cout << "Grid is uniform" << endl
-		<< "Coef: " << coefGrid << endl
-		<< "Width: " << width << endl
-		<< "Count of elements: " << nodesCount << endl
-		<< "hx: " << hx << endl;
 	nodes.resize(width);
 
 
@@ -95,9 +89,9 @@ void GRID::buildGrid()
 		nodes[0].setNodesData(xLeft, 0, 1, coefGrid);
 
 		i = 1;
-		x = xLeft + hx * i;
-		for (elem = 1; elem < width; elem += width, i++)
+		for (elem = 1; elem < nodesCount - 1; elem++, i++)
 		{
+			x = xLeft + hx * i;
 			nodes[elem].setNodesData(x, i, 0, coefGrid);
 			nodes[elem].border = 0;
 		}
@@ -143,7 +137,6 @@ void GRID::buildTimeGrid()
 	if (isTimeUniform) {
 
 		ht = ((tLast - tFirst) / double(tCount - 1)) / pow(2, coefTime);
-		cout << ht << endl;
 		if (coefTime != 0)
 			width = (width - 1) * pow(2, coefTime) + 1;
 

@@ -9,13 +9,13 @@ public:
 	void LUdecomposition();
 	void executeDirectTraversal();
 	void executeReverseTraversal();
-
+	void testSLAE();
 
 protected:
 	matrix2D A;
 	vector1D di, al, au;
 	vector1D b;
-	vector1D q, qPrev;
+	vector1D q, qPrevTime;
 	int maxiter;
 	double E, delta;
 

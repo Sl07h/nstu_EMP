@@ -24,34 +24,35 @@ void FEM::solve()
 	ofstream fout("output/solution.txt");
 	// Задаём начальные условия
 	q.resize(nodesCount, 0);
-	qPrev.resize(nodesCount, 0);
+	qPrevTime.resize(nodesCount, 0);
 	for (size_t i = 0; i < nodesCount; i++)
-		qPrev[i] = u(nodes[i].x);
-
+		qPrevTime[i] = u(nodes[i].x);
+	fout << endl << qPrevTime << endl;
 
 	// Решаем в каждый момент временной сетки
 	for (size_t i = 1; i < times.size(); i++)
 	{
 		dt = times[i] - times[i - 1];
 		double t = times[i];
-		
+		int count = 0;
 		bool doCalculation = true;
 		while (doCalculation) {
-
 			buildGlobalMatrixA();
 			buildGlobalVectorb();
 			//printGlobalMatrixA();
 			//printGlobalVectorb();
 
 			calcWithLUDecomposition();
-			qPrev = q;
+			qPrevTime = q;
 
-			if (shouldCalc(i) == false) {
-				cout << "Iteration: " << i
-					<< "Time: " << t << endl;
+			if (shouldCalc(count) == false) {
+				cout << "Time Iteration: " << i
+					<< " Count: " << count << endl;
+				cout << q << endl;
 				fout << q << endl;
 				doCalculation = false;
 			}
+			count++;
 		}
 	}
 }
@@ -141,6 +142,8 @@ void FEM::printGlobalVectorb()
 // Построение локальной матрицы жёсткости
 void FEM::buildLocalMatrixG(int elemNumber)
 {
+	lambda0 = lambda(q[elemNumber], nodes[elemNumber].x);
+	lambda1 = lambda(q[elemNumber+1], nodes[elemNumber+1].x);
 	double numerator = (lambda0 + lambda1) / (2 * hx);
 	GLocal[0][0] = GLocal[1][1] = numerator;
 	GLocal[0][1] = GLocal[1][0] = -numerator;
@@ -179,6 +182,6 @@ void FEM::buildLocalmatrixA(int elemNumber)
 void FEM::buildLocalVectorb(int elemNumber)
 {
 	bLocal = { 0,0 };
-	bLocal[0] = f(nodes[elemNumber].x) * hx / 2 + sigma * hx / (6 * dt) * (2 * qPrev[0] + qPrev[1]);
-	bLocal[1] = f(nodes[elemNumber + 1].x) * hx / 2 + sigma * hx / (6 * dt) * (qPrev[0] + 2 * qPrev[1]);
+	bLocal[0] = f(nodes[elemNumber].x) * hx / 2 + sigma * hx / (6 * dt) * (2 * qPrevTime[0] + qPrevTime[1]);
+	bLocal[1] = f(nodes[elemNumber + 1].x) * hx / 2 + sigma * hx / (6 * dt) * (qPrevTime[0] + 2 * qPrevTime[1]);
 }

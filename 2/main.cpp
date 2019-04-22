@@ -30,7 +30,7 @@ void main() {
 	int coefGrid = 0;
 
 	bool isGridUniform = true;
-	bool isTimeUniform = false;
+	bool isTimeUniform = true;
 
 	if (!isGridUniform)
 		prefix = "Non";
@@ -38,8 +38,12 @@ void main() {
 	string gridFile = "grids/" + prefix + "Uniform_" + to_string(coefGrid) + ".txt";
 	string gridBorderFile = "grids/Border" + prefix + "Uniform_" + to_string(coefGrid) + ".txt";
 
+	int i = 0;
 	FEM fem;
-	fem.init(function_u[0], function_f[1], isGridUniform, isTimeUniform, 1, 0, 0);
+	//fem.testSLAE();
+
+
+	fem.init(function_u[i], function_f[i], isGridUniform, isTimeUniform, 1, 0, 0);
 	fem.inputGrid();
 	fem.buildGrid();
 
@@ -49,8 +53,9 @@ void main() {
 	fem.saveGridAndBorder(gridFile, gridBorderFile);
 	fem.solve();
 
-	string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
-	system(runVisualisation.c_str());
 
 
+
+	/*string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
+	system(runVisualisation.c_str());*/
 }

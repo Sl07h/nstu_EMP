@@ -12,10 +12,10 @@ public:
 
 
 protected:
-	double lambda0 = 1, lambda1 = 1;
+	double lambda0, lambda1;
 	double sigma = 1;
 	function1D f, u;
-
+	double lambda(double u, double x) { return 1 + x + u; }
 	void buildGlobalMatrixA();
 	void buildGlobalVectorb();
 	void printGlobalMatrixA();
