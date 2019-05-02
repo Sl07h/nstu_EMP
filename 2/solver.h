@@ -15,7 +15,7 @@ protected:
 	matrix2D A;
 	vector1D di, al, au;
 	vector1D b;
-	vector1D q, qPrevTime;
+	vector1D q, qPrev;
 	int maxiter;
 	double E, delta;
 

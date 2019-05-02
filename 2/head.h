@@ -12,6 +12,7 @@ using namespace std;
 
 
 typedef std::function<double(double)> function1D;
+typedef std::function<double(double, double)> function2D;
 
 typedef vector <double> vector1D;
 typedef vector <vector <double>> matrix2D;
@@ -143,7 +144,7 @@ inline double operator*(const vector1D& a, const vector1D& b) {
 // Потоковый вывод вектора
 inline std::ostream& operator<<(std::ostream& out, const vector1D& v) {
 	for (int i = 0; i < v.size() - 1; ++i)
-		out << v[i] << " ";
+		out << v[i] << ", ";
 	out << v.back();
 	return out;
 }

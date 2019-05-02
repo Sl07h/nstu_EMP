@@ -24,13 +24,14 @@ bool SOLVER::shouldCalc(int i)
 	if (i > maxiter)
 		return false;
 
-	//// Выход шагу
-	//if (calcNormE(q - qPrevTime) / calcNormE(q) < delta)
-	//	return false;
+	// Выход шагу
+	if (calcNormE(q - qPrev) / calcNormE(q) < delta)
+		return false;
 
-	//// Выход по относительной невязке
-	//if (calcNormE(multAonQ() - b) / calcNormE(b) < E)
-	//	return false;
+	// Выход по относительной невязке
+	if (calcNormE(multAonQ() - b) / calcNormE(b) < E)
+		return false;
+	
 	return true;
 }
 
@@ -84,11 +85,22 @@ void SOLVER::executeReverseTraversal()
 // Проверка решения СЛАУ
 void SOLVER::testSLAE()
 {
-	di = { 1, 8, 9, 10 };
+	/*di = { 1, 8, 9, 10 };
 	al = { 3, 3, 3 };
 	au = { 2, 4, 6 };
 	b = { 5, 31, 57, 49 };
 	q.resize(4, 0);
+	calcWithLUDecomposition();
+	cout << q << endl;*/
+
+	
+
+	di = { 1, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 1 };
+	al = { -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, 0 };
+	au = { 0, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333 };
+
+	b = { 1, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 10 };
+	q.resize(10, 0);
 	calcWithLUDecomposition();
 	cout << q << endl;
 }

@@ -12,7 +12,6 @@ struct NODE {
 							// 0		внутренний узел
 							// n		номер границы
 	int border;				// номер границы
-	double time;
 
 	void setNodesData(double _x, int _i, int _type, double _coef) {
 		x = _x;
@@ -44,7 +43,7 @@ protected:
 	bool isGridUniform;
 	int width;
 	double xLeft, xRight;
-	double hx, nx, kx, hxPrev;
+	double hx, nx, kx;
 	double dx;
 	int nodesCount, finiteElementsCount;
 	int condType;
@@ -53,8 +52,8 @@ protected:
 	bool isTimeUniform;
 	int tCount;
 	double tFirst, tLast;
-	double ht, nt, kt, htPrev;
-	double dt = 1;
+	double ht, nt, kt;
+	double dt;
 
 	// Узлы
 	vector <NODE> nodes;

@@ -6,7 +6,7 @@
 
 class FEM: public GRID, public SOLVER {
 public:
-	void init(function1D &_u, function1D &_f, bool _isGridUniform, bool _isTimeUniform, int _condType, int _coefGrid, int _coefTime);
+	void init(const function1D &_u, const function1D &_f, const function2D &_lambda, bool _isGridUniform, bool _isTimeUniform, int _condType, int _coefGrid, int _coefTime);
 	void solve();
 	
 
@@ -15,8 +15,8 @@ protected:
 	double lambda0, lambda1;
 	double sigma = 1;
 	function1D f, u;
-	double lambda(double u, double x) { return 1 + x + u; }
-	void buildGlobalMatrixA();
+	function2D lambda;
+	void buildGlobalMatrixA(double _dt);
 	void buildGlobalVectorb();
 	void printGlobalMatrixA();
 	void printGlobalVectorb();
