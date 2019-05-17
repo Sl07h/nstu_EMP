@@ -21,17 +21,26 @@ void SOLVER::calcWithLUDecomposition()
 bool SOLVER::shouldCalc(int i)
 {
 	// Выход по числу итераций
-	if (i > maxiter)
+	if (i > maxiter) {
+		//cout << endl << "STOP: maxiter" << endl
+		//	<< "Iter = " << i << endl << endl;
 		return false;
+	}
 
 	// Выход шагу
-	if (calcNormE(q - qPrev) / calcNormE(q) < delta)
+	if (calcNormE(q - qPrev) / calcNormE(q) < delta) {
+		//cout << endl << "STOP: step" << endl
+		//	<< "Iter = " << i << endl << endl;
 		return false;
+	}
 
 	// Выход по относительной невязке
-	if (calcNormE(multAonQ() - b) / calcNormE(b) < E)
+	if (calcNormE(multAonQ() - b) / calcNormE(b) < E) {
+		//cout << endl << "STOP: E = " << (calcNormE(multAonQ() - b) / calcNormE(b)) << endl
+		//	<< "Iter = " << i << endl << endl;
 		return false;
-	
+	}
+
 	return true;
 }
 
@@ -93,7 +102,7 @@ void SOLVER::testSLAE()
 	calcWithLUDecomposition();
 	cout << q << endl;*/
 
-	
+
 
 	di = { 1, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 2.66667, 1 };
 	al = { -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, -0.833333, 0 };

@@ -18,7 +18,6 @@ typedef vector <double> vector1D;
 typedef vector <vector <double>> matrix2D;
 
 
-
 // Сравнение векторов
 inline bool operator==(const vector1D& a, const vector1D& b) {
 #ifdef _DEBUG
@@ -154,4 +153,14 @@ inline std::ostream& operator<<(std::ostream& out, const matrix2D& v) {
 		out << v[i] << "  ";
 	out << v.back();
 	return out;
+}
+
+
+// Потоковый вывод вектора для TeX
+inline void printTeXVector(std::ofstream &fout, const vector1D &v, int coefGrid) {
+	fout << "$(";
+	for (int i = 0; i < v.size() - 1; ++i)
+		if (i % int(pow(2, coefGrid)) == 0)
+			fout << v[i] << ", ";
+	fout << v.back() << ")^T$";
 }

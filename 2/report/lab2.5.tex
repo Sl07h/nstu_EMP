@@ -1,0 +1,333 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[russian]{babel}
+\usepackage{fontspec}
+\setsansfont{Calibri}
+\setmonofont{Consolas}
+\setmainfont[
+    Ligatures=TeX,
+    Extension=.otf,
+    BoldFont=cmunbx,
+    ItalicFont=cmunti,
+    BoldItalicFont=cmunbi,
+]{cmunrm}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\setotherlanguage{english}
+
+
+\usepackage{geometry}
+\usepackage{pgfplotstable}
+
+\geometry{
+margin=2cm
+}
+
+% Создаем команду, чтобы переносить текст на новую строку внутри таблицы
+\newcommand{\tcell}[2][l]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\usepackage{indentfirst}
+
+\usepackage{arydshln}
+\usepackage[fleqn]{amsmath}
+\usepackage{xfrac}
+\usepackage{esint}
+\usepackage{amssymb}
+\usepackage{mathbbol}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{color}
+\usepackage{ulem}
+\usepackage{tabu}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{enumitem}
+
+\usepackage[outline]{contour}
+\contourlength{1.2pt}
+
+\usepackage{tikz}
+\usepackage{graphics}
+\usepackage{xcolor}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\usepackage[at]{easylist}
+
+\DeclareMathOperator{\sign}{sign}
+
+\newcommand{\insertTitle}[6]{
+\begin{titlepage}
+	\begin{center}
+    	\large
+		Министерство науки и высшего образования Российской Федерации
+		
+		Новосибирский государственный технический университет
+		%\vspace{0.25cm}
+		\vfill
+		{\textbf #1}
+		
+		Лабораторная работа №#2
+		\vfill
+	\end{center}
+	
+	\begin{tabular}{ m{7em}  m{7em} }
+	Факультет: & ФПМИ \\ 
+	Группа: & #3 \\  
+	Студент: & #4 \\
+	Вариант: & #5
+	\end{tabular}
+	\vfill
+
+\begin{center}
+Новосибирск
+
+#6
+\end{center}
+\end{titlepage}
+}
+
+
+\newcommand{\funcA}{ \[ u(x,t) = t \cdot x \] }
+\newcommand{\funcB}{ \[ u(x,t) = t \cdot 10 \cdot x \] }
+\newcommand{\funcC}{ \[ u(x,t) = t \cdot x^2 \] }
+\newcommand{\funcD}{ \[ u(x,t) = t \cdot x^3 \] }
+\newcommand{\funcE}{ \[ u(x,t) = t \cdot sin(x) \] }
+\newcommand{\funcF}{ \[ u(x,t) = t \cdot eps(x) \] }
+
+\newcommand{\inputTable}[1]{
+\begin{center}
+\noindent
+\pgfplotstabletypeset[
+	columns/i/.style={column name={\scriptsize coef},},
+	columns/nodes/.style={column name={\scriptsize число узлов},},
+	columns/iters/.style={column name={\scriptsize число итераций },},
+	columns/norm/.style={column name={\scriptsize норма вектора }, column type/.add={}{|},},
+	every head row/.style={before row=\hline,after row=\hline\hline}, 
+	every last row/.style={after row=\hline},
+	column type/.add={|}{},
+	col sep=tab,
+]{#1}
+\end{center}
+}
+
+
+
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+
+
+\newcommand{\myCodeInput}[3]{
+{\bf #2}
+\lstinputlisting[language=#1]{#3}
+}
+
+
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+\setlength{\abovedisplayskip}{0.1pt}
+\setlength{\belowdisplayskip}{0.1pt}
+
+%-------------------------------------------------------------------------------
+\insertTitle{Уравнения математической физики}{2}{ПМ-63}{Кожекин М.В.}{5}{2019}
+
+
+%-------------------------------------------------------------------------------
+\section{Цель работы}
+Разработать программу решения нелинейной одномерной краевой задачи методом конечных элементов. Сравнить метод простой итерации и метод Ньютона для решения данной задачи.
+
+
+%-------------------------------------------------------------------------------
+\section{Задание}
+1.	Выполнить конечноэлементную аппроксимацию исходного уравнения в соответствии с заданием. Получить формулы для вычисления компонент матрицы   и вектора правой части   для метода простой итерации. 
+
+2.	Реализовать программу решения нелинейной задачи методом простой итерации с учетом следующих требований:
+\begin{itemize}[noitemsep]
+\item язык программирования С++ или Фортран;
+\item предусмотреть возможность задания неравномерных сеток по пространству и  по времени, разрывность параметров уравнения по подобластям, учет краевых условий;
+\item матрицу хранить в ленточном формате, для решения СЛАУ использовать метод  -разложения;
+\item предусмотреть возможность использования параметра релаксации.
+\end{itemize}
+
+3.	Выполнить линеаризацию нелинейной системы алгебраических уравнений с использованием метода Ньютона. Получить формулы для вычисления компонент линеаризованных матрицы   и вектора правой части  
+
+4.	Реализовать программу решения нелинейной задачи методом Ньютона.
+
+5.	Протестировать разработанные программы.
+
+6.	Исследовать реализованные методы на различных зависимостях коэффициента от решения (или производной решения) в соответствии с заданием. На одних и тех же задачах сравнить по количеству итераций метод простой итерации и метод Ньютона. Исследовать скорость сходимости от параметра релаксации.
+
+
+{\bf Вариант 5:}
+Базисные функции линейные.
+
+\[ -div(\lambda(u)grad(u)+\sigma \frac{du}{dt} = f \]
+
+
+
+%-------------------------------------------------------------------------------
+\section{Анализ}
+
+Произведя временную аппроркимацию  по двуслойной неявной схеме исходное уравнение примет вид:
+
+\[ -div(\lambda(u)grad(u) + \frac{\sigma}{\Delta t_s} u_s = f + \frac{\sigma}{\Delta t_s} u_{s-1} \]
+
+
+В ходе конечноэлементной аппроксимации нелинейной начально-краевой задачи получается система нелинейных уравнений
+
+\[ { \bf A(q_s)q_s = b(q_s)} \]
+
+у которой
+
+\[ G_{i,j} = \int_{\Omega}{\lambda(\frac{du}{dx}) grad\psi_i grad\psi_j d\Omega} = \]
+
+\[ G_{0,0} = \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_0 d\Omega} = \]
+
+\[ = \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_0 d\Omega} =\]
+
+\[ = \frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h} =  G_{1,1} \]
+
+\[ G_{0,1} = \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_1 d\Omega} = \]
+
+\[ = \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_1 d\Omega} = \]
+
+\[ = -\frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h} = G_{1,0}\]
+
+%\par\noindent\rule{\textwidth}{0.4pt}
+\[ G = \frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \]
+\par\noindent\rule{\textwidth}{0.4pt}
+
+\[ M_{i,j} = \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_i\psi_jd\Omega} \]
+
+\[ M_{0,0} = \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_0d\Omega} =
+\frac{\sigma h}{\Delta t_s} \int_0^1{\xi^2 d\xi } =
+\frac{\sigma h}{\Delta t_s} \frac{\xi^3}{3}\Bigr|_{0}^{1} = \frac{\sigma h}{3 \Delta t_s} = M_{1,1}
+\]
+
+\[ M_{0,1} = \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_1d\Omega} =
+\frac{\sigma h}{\Delta t_s} \int_0^1{\xi(1-\xi) d\xi } =
+\frac{\sigma h}{\Delta t_s} \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} = \frac{\sigma h}{6 \Delta t_s} = M_{1,0}
+\]
+
+%\par\noindent\rule{\textwidth}{0.4pt}
+\[ M = \frac{\sigma h}{6 \Delta t_s}\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} \]
+\par\noindent\rule{\textwidth}{0.4pt}
+
+\[ b_i = \int_{\Omega}{f_s\psi_i d\Omega}+\frac{1}{\Delta t_s}\int_{\Omega}{\sigma u_{q-1}^h \psi_id\Omega} \left | u_{q-1}{h} = \sum_{k=0}^1{q_{k,s-1}\psi_k} \right |
+\]
+
+\[ b_0 = fh\int_{0}^{1}{\xi d\xi}+\frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_k \psi_0 d\Omega}
+\]
+
+\[ =fh\frac{\xi^2}{2}\Bigr|_{0}^{1} + \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_0 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_0 d\Omega} \Bigr]
+\]
+
+\[ =\frac{fh}{2} + \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\xi^2 d\xi} + q_{1,s-1}\int_{\Omega}{\xi (1-\xi) d\xi} \Bigr]
+\]
+
+\[ =\frac{fh}{2} + \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\frac{\xi^3}{3} \Bigr|_{0}^{1} + q_{1,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} \Bigr]
+\]
+
+\[ =\frac{fh}{2} + \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{3}q_{0,s-1} + \frac{1}{6}q_{1,s-1} \Bigr]
+=\frac{fh}{2} + \frac{\sigma}{6 \Delta t_s} \Bigl[ 2q_{0,s-1} + q_{1,s-1} \Bigr]
+\]
+
+\[ b_1 = fh\int_{0}^{1}{(1-\xi) d\xi}+\frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_0 \psi_1 d\Omega}
+\]
+
+\[=fh\frac{\xi^2}{2}\Bigr|_{0}^{1} + \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_1 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_1 d\Omega} \Bigr]
+\]
+
+\[=\frac{fh}{2} + \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\xi (1-\xi) d\xi} + q_{1,s-1}\int_{\Omega}{(1-\xi)^2 d\xi} \Bigr]
+\]
+
+\[=\frac{fh}{2} + \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} + q_{1,s-1}(1 - \xi)^3 \Bigr|_{0}^{1} \Bigr]
+\]
+
+\[=\frac{fh}{2} + \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{6}q_{0,s-1} + \frac{1}{3}q_{1,s-1} \Bigr]
+=\frac{fh}{2} + \frac{\sigma}{6 \Delta t_s} \Bigl[ q_{0,s-1} + 2 q_{1,s-1} \Bigr]
+\]
+
+%\par\noindent\rule{\textwidth}{0.4pt}
+\[ b = \begin{pmatrix} \frac{fh}{2} + \frac{\sigma}{6 \Delta t_s} \Bigl[ 2q_{0,s-1} + q_{1,s-1} \Bigr] \\ 
+							\frac{fh}{2} + \frac{\sigma}{6 \Delta t_s} \Bigl[ q_{0,s-1} + 2 q_{1,s-1} \Bigr]
+		\end{pmatrix} \]
+\par\noindent\rule{\textwidth}{0.4pt}
+
+
+%-------------------------------------------------------------------------------
+\section{Исследования}
+\funcA{}
+\inputTable{file_u0.txt}
+\funcB{}
+\inputTable{file_u1.txt}
+\funcC{}
+\inputTable{file_u2.txt}
+\funcD{}
+\inputTable{file_u3.txt}
+\funcE{}
+\inputTable{file_u4.txt}
+\funcF{}
+\inputTable{file_u5.txt}
+
+
+
+
+
+
+%-------------------------------------------------------------------------------
+\section{Выводы}
+
+
+
+%-------------------------------------------------------------------------------
+%\section{Исходный код программы}
+%\myCodeInput{c++}{head.h}{../head.h}
+%
+%\myCodeInput{c++}{grid.h}{../grid.h}
+%\myCodeInput{c++}{grid.cpp}{../grid.cpp}
+%
+%\myCodeInput{c++}{fem.h}{../fem.h}
+%\myCodeInput{c++}{fem.cpp}{../fem.cpp}
+%
+%\myCodeInput{c++}{solver.h}{../solver.h}
+%\myCodeInput{c++}{solver.cpp}{../solver.cpp}
+%
+%\myCodeInput{c++}{main.cpp}{../main.cpp}
+
+\end{document}
+

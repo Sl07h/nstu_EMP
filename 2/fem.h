@@ -6,16 +6,29 @@
 
 class FEM: public GRID, public SOLVER {
 public:
-	void init(const function1D &_u, const function1D &_f, const function2D &_lambda, bool _isGridUniform, bool _isTimeUniform, int _condType, int _coefGrid, int _coefTime);
-	void solve();
+	void init(const function2D &_u, const function2D &_f, const function1D &_lambda, double _sigma, bool _isGridUniform, bool _isTimeUniform, int _condType, int _coefGrid, int _coefTime);
+	void solve(std::ofstream& fout);
 	
 
 
 protected:
 	double lambda0, lambda1;
-	double sigma = 1;
-	function1D f, u;
-	function2D lambda;
+	double sigma;
+	double t;
+	function2D f, u;
+	function1D lambda;
+	double calcNormAtMainNodes(const vector1D &x) {
+		double tmp = 0;
+		int count = 0;
+		for (size_t i = 0; i < x.size(); i++)
+			if (i % int(pow(2, coefGrid)) == 0) {
+				tmp += x[i] * x[i];
+				count++;
+			}
+		cout << count << endl;
+		return sqrt(tmp);
+	}
+
 	void buildGlobalMatrixA(double _dt);
 	void buildGlobalVectorb();
 	void printGlobalMatrixA();
