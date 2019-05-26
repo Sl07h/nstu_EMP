@@ -1,0 +1,425 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[russian]{babel}
+\usepackage{fontspec}
+\setsansfont{Calibri}
+\setmonofont{Consolas}
+\setmainfont[
+    Ligatures=TeX,
+    Extension=.otf,
+    BoldFont=cmunbx,
+    ItalicFont=cmunti,
+    BoldItalicFont=cmunbi,
+]{cmunrm}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\setotherlanguage{english}
+
+
+\usepackage{geometry}
+\usepackage{pgfplotstable}
+
+\geometry{
+margin=2cm
+}
+
+% Создаем команду, чтобы переносить текст на новую строку внутри таблицы
+\newcommand{\tcell}[2][l]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\usepackage{indentfirst}
+
+\usepackage{arydshln}
+\usepackage[fleqn]{amsmath}
+\usepackage{xfrac}
+\usepackage{esint}
+\usepackage{amssymb}
+\usepackage{mathbbol}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{color}
+\usepackage{ulem}
+\usepackage{tabu}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{enumitem}
+
+\usepackage[outline]{contour}
+\contourlength{1.2pt}
+
+\usepackage{tikz}
+\usepackage{graphics}
+\usepackage{xcolor}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\usepackage[at]{easylist}
+
+\DeclareMathOperator{\sign}{sign}
+
+\newcommand{\insertTitle}[6]{
+\begin{titlepage}
+	\begin{center}
+    	\large
+		Министерство науки и высшего образования Российской Федерации
+		
+		Новосибирский государственный технический университет
+		%\vspace{0.25cm}
+		\vfill
+		{\textbf #1}
+		
+		Лабораторная работа №#2
+		\vfill
+	\end{center}
+	
+	\begin{tabular}{ m{7em}  m{7em} }
+	Факультет: & ФПМИ \\ 
+	Группа: & #3 \\  
+	Студент: & #4 \\
+	Вариант: & #5
+	\end{tabular}
+	\vfill
+
+\begin{center}
+Новосибирск
+
+#6
+\end{center}
+\end{titlepage}
+}
+
+
+
+
+\usepackage{slashbox}
+\newcommand{\inputTable}[1]{
+\begin{center}
+\noindent\footnotesize\pgfplotstabletypeset[
+	columns={a,$1$,$u$,$u^2$,$u^2+1$,$u^3$,$u^4$,$e^u$,sinu},
+	columns/a/.style={string type, column name={\backslashbox{$u(x, t)$}{$\lambda(u)$}}},
+	columns/$1$/.style={string type},
+	columns/$u$/.style={string type},
+	columns/$u^2$/.style={string type},
+	columns/$u^2+1$/.style={string type},
+	columns/$u^3$/.style={string type},
+	columns/$u^4$/.style={string type},
+	columns/$e^u$/.style={string type},
+	columns/sinu/.style={string type, column name={$\sin u$}, column type/.add={}{|},},
+	every head row/.style={before row=\hline,after row=\hline}, 
+	every last row/.style={after row=\hline},
+	column type/.add={|},
+	col sep=tab,
+]{#1}
+\end{center}
+}
+
+
+\newcommand{\inputTableConvergence}[1]{
+\noindent{\scriptsize\pgfplotstabletypeset[
+	columns={i, nodes, iters, norm},
+	columns/i/.style={string type},
+	columns/nodes/.style={string type},
+	columns/iters/.style={string type},
+	columns/norm/.style={string type, column type/.add={}{|},},
+	every head row/.style={before row=\hline,after row=\hline}, 
+	every last row/.style={after row=\hline},
+	column type/.add={|},
+	col sep=tab,
+]{#1}}
+}
+
+\newcommand{\inputTableConvergencecopy}[1]{
+\[\begin{tabular}{ | с | с | с | m{11em}  m{8em} m{8em} }
+	\hline
+	\backslashbox{время}{пространство} & равномерное & не равномерное \\ \hline
+	равномерное & \inputTableConvergence{#1.11.txt} & \inputTableConvergence{#1.01.txt} \\ \hline
+	не равномерное & \inputTableConvergence{#1.10.txt} & \inputTableConvergence{#1.00.txt} \\
+	\hline
+\end{tabular}\]
+}
+
+
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.85,0.85,0.85}
+ 
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{blue},
+	basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
+   	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+    	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=4
+}
+\lstset{ style=mystyle}
+
+
+\newcommand{\myCodeInput}[3]{
+{\bf #2}
+\lstinputlisting[language=#1]{#3}
+}
+
+
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\setlength{\abovedisplayskip}{1pt}
+\setlength{\belowdisplayskip}{1pt}
+
+%-------------------------------------------------------------------------------
+\insertTitle{Уравнения математической физики}{2}{ПМ-63}{Утюганов Д.С.}{5}{2019}
+
+
+%-------------------------------------------------------------------------------
+\section{Цель работы}
+Разработать программу решения нелинейной одномерной краевой задачи методом конечных элементов. Сравнить метод простой итерации и метод Ньютона для решения данной задачи.
+
+
+%-------------------------------------------------------------------------------
+\section{Задание}
+1.	Выполнить конечноэлементную аппроксимацию исходного уравнения в соответствии с заданием. Получить формулы для вычисления компонент матрицы   и вектора правой части   для метода простой итерации. 
+
+2.	Реализовать программу решения нелинейной задачи методом простой итерации с учетом следующих требований:
+\begin{itemize}[noitemsep]
+\item язык программирования С++ или Фортран;
+\item предусмотреть возможность задания неравномерных сеток по пространству и  по времени, разрывность параметров уравнения по подобластям, учет краевых условий;
+\item матрицу хранить в ленточном формате, для решения СЛАУ использовать метод  -разложения;
+\item предусмотреть возможность использования параметра релаксации.
+\end{itemize}
+
+3.	Выполнить линеаризацию нелинейной системы алгебраических уравнений с использованием метода Ньютона. Получить формулы для вычисления компонент линеаризованных матрицы   и вектора правой части  
+
+4.	Реализовать программу решения нелинейной задачи методом Ньютона.
+
+5.	Протестировать разработанные программы.
+
+6.	Исследовать реализованные методы на различных зависимостях коэффициента от решения (или производной решения) в соответствии с заданием. На одних и тех же задачах сравнить по количеству итераций метод простой итерации и метод Ньютона. Исследовать скорость сходимости от параметра релаксации.
+
+
+{\bf Вариант 5:}
+Базисные функции линейные.
+
+\[ -div(\lambda(u)grad(u)+\sigma \frac{du}{dt} = f \]
+
+
+
+%-------------------------------------------------------------------------------
+\section{Анализ}
+
+Произведя временную аппроркимацию  по двуслойной неявной схеме исходное уравнение примет вид:
+
+
+\begin{aligned}
+-div(\lambda(u)grad(u) + \frac{\sigma}{\Delta t_s} u_s = f + \frac{\sigma}{\Delta t_s} u_{s-1} \\[5pt]
+\end{aligned}
+
+В ходе конечноэлементной аппроксимации нелинейной начально-краевой задачи получается система нелинейных уравнений
+
+\begin{aligned}
+{ \bf A(q_s)q_s = b(q_s)} \\[5pt]
+\end{aligned}
+
+у которой компоненты матрицы $ { \bf A(q_s)q_s } $ и вектора правой части $ { \bf b(q_s)} $ вычисляются следующим образом:
+
+\begin{aligned}
+A_{ij}(q_s) &= \int_{\Omega}{\lambda_s(u^h(q_s)) grad\psi_i grad\psi_j d\Omega} + \frac{1}{\Delta t_s}\int_{\Omega}{\sigma_s(u^h(q_s)) \psi_i\psi_jd\Omega} + \int_{S_3}{\beta_s(u^h(q_s)) \psi_i \psi_j dS} \\[7pt]
+b_{i}(q_s) &= \int_{\Omega}{f_s(u^h(q_s)) \psi_i d\Omega} + \frac{1}{\Delta t_s} \int_{\Omega}{(u^h(q_s))(u^h(q_{s-1}))} + \\[7pt] 
+&+ \int_{S_2}{\Theta_s(u^h(q_s)) \psi_i dS} + \int_{S_2}{\beta_s (u^h(q_s)) u_{\beta, s} (u^h(q_s)) \psi_i dS} \\[7pt]
+\end{aligned}
+
+где
+
+\[ u^h(q_s) = \sum_{k}^{} {q_{k,s} \psi_k} \qquad u^h(q_{s-1}) = \sum_{k}^{} {q_{k,s-1} \psi_k} \]
+
+
+
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+\par\noindent\rule{\textwidth}{0.4pt}
+
+\begin{aligned}
+G_{i,j}&=\int_{\Omega}{\lambda(u) grad\psi_i grad\psi_j d\Omega}  \\[7pt]
+G_{0,0} &= \sum_{k=0}^{1} \int_{\Omega}{\lambda_k \psi_k grad\psi_0 grad\psi_0 d\Omega} = \\[7pt]
+&= \int_{\Omega}{\lambda_0 \psi_0 grad\psi_0 grad\psi_0 d\Omega} + \int_{\Omega}{\lambda_1 \psi_1 grad\psi_0 grad\psi_0 d\Omega} = \\[7pt]
+&= \frac{1}{h} \Bigl[\lambda_0 \int_{\Omega}{\psi_0 d\Omega} + \lambda_1\int_{\Omega}{\psi_1  d\Omega}\Bigr] = \frac{1}{h} \Bigl[\lambda_0 \int_{0}^{1}{\xi d\xi} + \lambda_1\int_{0}^{1}{(1-\xi) d\xi}\Bigr] = \\[7pt]
+&= \frac{1}{h} \Bigl[\lambda_0 \frac{\xi^2}{2} \Bigr|_{0}^{1} + \lambda_1(\xi - \frac{\xi^2}{2}) \Bigr|_{0}^{1}  \Bigr] = \frac{\lambda_0 + \lambda_1}{2h} =  G_{1,1} \\[7pt]
+G_{0,1} &= \sum_{k=0}^{1} \int_{\Omega}{\lambda_k \psi_k grad\psi_1 grad\psi_1 d\Omega} = \\[7pt]
+&= \int_{\Omega}{\lambda_0 \psi_0 grad\psi_1 grad\psi_1 d\Omega} + \int_{\Omega}{\lambda_1 \psi_1grad\psi_1 grad\psi_1 d\Omega} = \\[7pt]
+&= -\frac{1}{h} \Bigl[\lambda_0 \int_{\Omega}{\psi_0 d\Omega} + \lambda_1\int_{\Omega}{\psi_1  d\Omega}\Bigr] = -\frac{1}{h} \Bigl[\lambda_0 \int_{0}^{1}{\xi d\xi} + \lambda_1\int_{0}^{1}{(1-\xi) d\xi}\Bigr] = \\[7pt]
+&= -\frac{1}{h} \Bigl[\lambda_0 \frac{\xi^2}{2} \Bigr|_{0}^{1} + \lambda_1(\xi - \frac{\xi^2}{2}) \Bigr|_{0}^{1}  \Bigr] = -\frac{\lambda_0 + \lambda_1}{2h} = G_{1,0} \\[7pt]
+G &= \frac{\lambda_0 + \lambda_1}{2h}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
+\end{aligned}
+
+
+
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+\par\noindent\rule{\textwidth}{0.4pt}
+
+\begin{aligned}
+M_{i,j} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_i\psi_jd\Omega} \\[7pt]
+M_{0,0} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_0d\Omega} = \frac{\sigma h}{\Delta t_s} \int_0^1{\xi^2 d\xi } = \frac{\sigma h}{\Delta t_s} \frac{\xi^3}{3}\Bigr|_{0}^{1} = \frac{\sigma h}{3 \Delta t_s} = M_{1,1} \\[7pt]
+M_{0,1} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_1d\Omega} = \frac{\sigma h}{\Delta t_s} \int_0^1{\xi(1-\xi) d\xi } = \frac{\sigma h}{\Delta t_s} \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} = \frac{\sigma h}{6 \Delta t_s} = M_{1,0} \\[7pt]
+M &= \frac{\sigma h}{6 \Delta t_s}\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}
+\end{aligned}
+
+
+
+
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+\par\noindent\rule{\textwidth}{0.4pt}
+\begin{aligned}
+b_i &= \int_{\Omega}{f_s\psi_i d\Omega}    +    \frac{1}{\Delta t_s}\int_{\Omega}{\sigma u_{q-1}^h \psi_id\Omega} \left| u_{q-1}{h} = \sum_{k=0}^1{q_{k,s-1}\psi_k} \right| \\[7pt]
+b_0 &= \sum_{k=0}^{1} \int_{\Omega} {f_k \psi_k \psi_0 d\Omega}    +    \frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_k \psi_0 d\Omega} \\[7pt]
+&= \Bigl[ f_0 \int_{\Omega}{\psi_0 \psi_0 d\Omega} + f_1 \int_{\Omega}{\psi_1 \psi_0 d\Omega} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_0 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_0 d\Omega} \Bigr] \\[7pt]
+&= h \Bigl[ f_0 \int_{0}^{1}{\xi^2 d\xi} + f_1 \int_{0}^{1}{(1-\xi) \xi d\xi} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{0}^{1}{\xi^2 d\xi} + q_{1,s-1}\int_{0}^{1}{(1-\xi) 
+\xi d\xi} \Bigr] \\[7pt]
+&= h \Bigl[ f_0 \frac{\xi^3}{3} \Bigr|_{0}^{1} + f_1 \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} \Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\frac{\xi^3}{3} \Bigr|_{0}^{1} + q_{1,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} \Bigr] \\[7pt]
+&= h \Bigl[ f_0\frac{1}{3} + f_1\frac{1}{6} \Bigr] + \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{3}q_{0,s-1}    +    \frac{1}{6}q_{1,s-1} \Bigr] \\[7pt]
+&= \frac{h}{6} \Bigl[ 2f_0 + f_1 \Bigr] + \frac{\sigma}{6 \Delta t_s} \Bigl[ 2q_{0,s-1} + q_{1,s-1} \Bigr] \\[7pt]
+b_1 &= \sum_{k=0}^{1} \int_{\Omega} {f_k \psi_k \psi_1 d\Omega}    +    \frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_0 \psi_1 d\Omega} = \\[7pt]
+&= \Bigl[ f_0 \int_{\Omega}{\psi_0 \psi_1 d\Omega} + f_1 \int_{\Omega}{\psi_1 \psi_1 d\Omega} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_1 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_1 d\Omega} \Bigr] = \\[7pt]
+&= h \Bigl[ f_0 \int_{0}^{1}{\xi (1-\xi) d\xi} + f_1 \int_{0}^{1}{(1-\xi)^2 d\xi} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{0}^{1}{\xi (1-\xi) d\xi} + q_{1,s-1}\int_{0}^{1}{(1-\xi)^2 d\xi} \Bigr] = \\[7pt]
+&=h \Bigl[ f_0 \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} + f_1 (1 - \xi)^3 \Bigr|_{0}^{1} \Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} + q_{1,s-1}(1 - \xi)^3 \Bigr|_{0}^{1} \Bigr] =  \\[7pt]
+&= \frac{h}{6}\Bigl[f_0\frac{1}{6}+f_1\frac{1}{3}\Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{6}q_{0,s-1} + \frac{1}{3}q_{1,s-1} \Bigr] \\[7pt]
+&=\frac{h}{6}\Bigl[f_0+2f_1\Bigr]    +    \frac{\sigma}{6 \Delta t_s} \Bigl[ q_{0,s-1} + 2 q_{1,s-1} \Bigr] \\[7pt]
+b &= \frac{hx}{6}\begin{pmatrix} 2f_0+f_1 \\ f_0+2f_1\end{pmatrix} + \frac{\sigma}{6 \Delta t_s} \begin{pmatrix} 2q_{0,s-1} + q_{1,s-1} \\  q_{0,s-1} + 2 q_{1,s-1} \end{pmatrix}
+\end{aligned}
+\par\noindent\rule{\textwidth}{0.4pt}
+
+
+
+
+
+\section{Точность для разных функций u и $\lambda$}
+%-------------------------------------------------------------------------------
+
+В ходе следующего исследования использовались следующие параметры:
+
+$\varepsilon = 1e-7$
+
+$\sigma = 1$
+
+$maxiter = 10000$
+
+$\text{Область пространства } \Omega = [0, 1]$
+
+$\text{Время задано на отрезке [0, 1]}$
+
+$\text{Первоначальное число узлов 11, а конечных элементов 10}$
+
+$\text{Для неравномерных сеток по времени и пространству коэффициент k=1.1}$
+
+\inputTable{table.txt}
+%-------------------------------------------------------------------------------
+\subsection{Вывод}
+
+Как видно из таблицы метод начинает сходиться хуже при степени полинома выше двух. Метод не работает если функция $\lambda$ гармоническая (в нашем случае sin(u). Это происходит даже при численном взятии интегралов при построении локальной матрицы А и вектора b.
+
+
+
+%-------------------------------------------------------------------------------
+\section{Точность решения при дроблении сетки}
+
+В ходе следующего исследования использовались следующие параметры:
+
+$\varepsilon = 1e-7$
+
+$\sigma = 1$
+
+$maxiter = 10000$
+
+$\text{Область пространства } \Omega = [0, 1]$
+
+$\text{Время задано на отрезке [0, 1]}$
+
+$\text{Первоначальное число узлов 11, а конечных элементов 10}$
+
+$\text{Для неравномерных сеток по времени и пространству коэффициент k=1.1}$
+
+Функция $\lambda(u) = u$
+
+
+\[ 3x + t \]
+\inputTableConvergencecopy{file_u0}
+\[ 2x^2 + t \]
+\inputTableConvergencecopy{file_u1}
+\[ x^3 + t \]
+\inputTableConvergencecopy{file_u2}
+\[ x^4 + t \]
+\inputTableConvergencecopy{file_u3}
+\[ e^x + t \]
+\inputTableConvergencecopy{file_u4}
+\[ 3x + t \]
+\inputTableConvergencecopy{file_u5}
+\[ 3x + t^2 \]
+\inputTableConvergencecopy{file_u6}
+\[ 3x + t^3 \]
+\inputTableConvergencecopy{file_u7}
+\[ 3x + e^t \]
+\inputTableConvergencecopy{file_u8}
+\[ 3x + sin(t) \]
+\inputTableConvergencecopy{file_u9}
+\[ e^x + t^2 \]
+\inputTableConvergencecopy{file_u10}
+\[ e^x + t^3 \]
+\inputTableConvergencecopy{file_u11}
+\[ e^x + e^t \]
+\inputTableConvergencecopy{file_u12}
+\[ e^x + sin(t) \]
+\inputTableConvergencecopy{file_u13}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Вывод}
+
+Т.к. {\bf порядок сходимости} - это степень того, насколько сильно увеличивается точность при дроблении сетки. Он определяется из степени x.
+
+Исходя из исследований можно заметить, что порядок сходимости 0.5
+
+
+
+%-------------------------------------------------------------------------------
+\section{Исходный код программы}
+\myCodeInput{c++}{head.h}{../head.h}
+
+\myCodeInput{c++}{grid.h}{../grid.h}
+\myCodeInput{c++}{grid.cpp}{../grid.cpp}
+
+\myCodeInput{c++}{fem.h}{../fem.h}
+\myCodeInput{c++}{fem.cpp}{../fem.cpp}
+
+\myCodeInput{c++}{solver.h}{../solver.h}
+\myCodeInput{c++}{solver.cpp}{../solver.cpp}
+
+\myCodeInput{c++}{main.cpp}{../main.cpp}
+
+\end{document}
+
