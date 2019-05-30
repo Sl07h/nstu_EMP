@@ -6,6 +6,10 @@
 class SOLVER {
 
 public:
+	void initSLAE();
+	void BiCG();
+	
+
 	void getVectX(vector1D &x) { x = b; };
 	void generateVectX(int size);
 	void writeXToFile(const char *fileName);
@@ -39,4 +43,18 @@ protected:
 	vector1D multD(const vector1D&x);
 	double calcRelativeDiscrepancy();
 	double calcNormE(const vector1D &x) { return sqrt(x*x); }
+
+
+	matrix2D A;
+
+	vector1D xPrev;	// решение на k-1 итерации
+	
+	vector1D s;	// вспомогательный вектор
+	double alpha, beta;
+
+	
+	void generateInitialGuess();
+	vector1D multAOn(const vector1D &v);
+	vector1D multAtOn(const vector1D &v);
+	bool doStop(int i);
 };

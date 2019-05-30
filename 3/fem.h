@@ -8,10 +8,10 @@ class FEM : public GRID, public SOLVER {
 public:
 
 	void init(
-		const function1D & _u_s,
-		const function1D & _u_c,
-		const function1D & _f_s,
-		const function1D & _f_c,
+		function1D _u_s,
+		function1D _u_c,
+		function1D _f_s,
+		function1D _f_c,
 		double _lambda,
 		double _sigma,
 		double _omega,
@@ -24,6 +24,9 @@ public:
 	);
 	void solve();
 	inline int getNodesCount() { return nodesCount; }
+	void convAToDense();
+	void outputA();
+	void outputALocal();
 
 
 protected:
