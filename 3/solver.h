@@ -36,7 +36,7 @@ protected:
 	vector <int> ia, ja;
 	int n, maxiter;
 	double E, delta;
-	vector1D x, r, z, p, b, bTmp;
+	vector1D x, xprev, r, z, p, b, bTmp;
 
 
 	vector1D multA(const vector1D&x);

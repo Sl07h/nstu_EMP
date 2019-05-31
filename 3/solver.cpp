@@ -220,13 +220,11 @@ double SOLVER::calcRelativeDiscrepancy() {
 // Локально - оптимальная схема
 pair<int, double> SOLVER::LOS() {
 
-	quantityOfActions = 0;
-
 	x.clear();			// Задаём начальное приближение
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
 	r.resize(n);
 
-	vector1D xprev = x;
+	xprev = x;
 	r = b - multA(x);	// r_0 = b - A*x_0
 	z = r;				// z_0 = r_0
 	p = multA(z);		// p_0 = A*z_0
@@ -234,7 +232,6 @@ pair<int, double> SOLVER::LOS() {
 
 	for (int i = 0; i < maxiter; ++i) {
 
-		quantityOfActions += 12 * n;
 		double pp = (p * p);
 		double alpha = (p * r) / pp;
 
@@ -248,10 +245,8 @@ pair<int, double> SOLVER::LOS() {
 		p = bTmp + beta * p;
 
 
-		quantityOfActions += 2 * n;
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			cout << quantityOfActions << endl;
 			return make_pair(i, relativeDiscrepancy);
 		}
 		xprev = x;
@@ -266,7 +261,7 @@ pair<int, double> SOLVER::LOSfactD() {
 
 	x.clear();			// Задаём начальное приближение
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
-	vector1D xprev = x;
+	xprev = x;
 	decomposionD();
 
 	r = b - multA(x);	// r_0 = b - A*x_0
@@ -315,7 +310,7 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 	x.clear();						// Задаём начальное приближение
 	x.resize(n, 0);					// x_0 = (0, 0, ...)
-	vector1D xprev = x;
+	xprev = x;
 	decomposionLUsq();
 
 	r = b - multA(x);				// r_0 = b - A*x_0

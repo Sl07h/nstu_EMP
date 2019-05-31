@@ -97,13 +97,17 @@ void FEM::solve()
 	LOS();
 	//BiCG();
 
-	cout << x << endl;
-
+	cout << endl << "Expectation:" << endl;
 	for (size_t i = 0; i < nodesCount; i++)
 	{
-		cout << u_s(nodes[i].x) << "\t";
-		cout << u_c(nodes[i].x) << "\t";
+		cout << u_s(nodes[i].x) << ", ";
+		cout << u_c(nodes[i].x) << ", ";
 	}
+	cout << endl;
+	cout << "Reality:" << endl;
+	cout << x << endl;
+	cout << "b:" << endl;
+	cout << b << endl;
 }
 
 
@@ -163,7 +167,9 @@ void FEM::buildGlobalMatrixA()
 			int i0 = ia[i];
 			int i1 = ia[i + 1];
 			int tLocal = 0;
-			if (t < 2)
+			if (t == 0)
+				i0 = i1;
+			else if (t == 1)
 				i0 = i1 - 1;
 			for (size_t k = i0; k < i1; k++, tLocal++)
 			{
@@ -200,19 +206,19 @@ void FEM::buildGlobalVectorb()
 	b.clear();
 	b.resize(2 * nodesCount, 0);
 
-	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
+	for (size_t elemNumber = 0; elemNumber < 2 * finiteElementsCount; elemNumber += 2)
 	{
-		buildLocalVectorb(elemNumber);
+		buildLocalVectorb(elemNumber / 2);
 		int k = 0;
 		for (size_t i = elemNumber; i < elemNumber + 4; i++, k++)
-			b[i] = bLocal[k];
+			b[i] += bLocal[k];
 	}
 
 	// Первые краевые условия
-	b[0] = u_c(nodes[0].x);
-	b[1] = u_s(nodes[0].x);
-	b[b.size() - 2] = u_c(nodes[b.size() - 2].x);
-	b[b.size() - 1] = u_s(nodes[b.size() - 1].x);
+	b[0] = u_s(nodes[0].x);
+	b[1] = u_c(nodes[0].x);
+	b[b.size() - 2] = u_s(nodes[nodes.size() - 1].x);
+	b[b.size() - 1] = u_c(nodes[nodes.size() - 1].x);
 }
 
 
@@ -225,14 +231,14 @@ void FEM::buildGlobalVectorb()
 // Построение локальной матрицы А
 void FEM::buildLocalmatrixA(int elemNumber)
 {
-	p00 = lambda / (hx*hx) - (omega*omega)*hi / 3;
+	p00 = lambda / hx - omega * omega * hi * hx / 3;
 	p11 = p00;
-	p01 = -lambda / (hx*hx) - (omega*omega)*hi / 6;
+	p01 = -lambda / hx - omega * omega * hi * hx / 6;
 	p10 = p01;
 
-	c00 = omega * sigma / 3;
+	c00 = omega * sigma * hx / 3;
 	c11 = c00;
-	c01 = omega * sigma / 6;
+	c01 = omega * sigma * hx / 6;
 	c10 = c01;
 
 	ALocal = { {p00,	-c00,	p01,	-c01},
@@ -246,8 +252,12 @@ void FEM::buildLocalmatrixA(int elemNumber)
 void FEM::buildLocalVectorb(int elemNumber)
 {
 	bLocal = { 0, 0, 0, 0 };
-	bLocal[0] = f_c(nodes[elemNumber].x);
-	bLocal[1] = f_s(nodes[elemNumber].x);
-	bLocal[2] = f_c(nodes[elemNumber + 1].x);
-	bLocal[3] = f_s(nodes[elemNumber + 1].x);
+	double f0_s = f_s(nodes[elemNumber].x);
+	double f0_c = f_c(nodes[elemNumber].x);
+	double f1_s = f_s(nodes[elemNumber + 1].x);
+	double f1_c = f_c(nodes[elemNumber + 1].x);
+	bLocal[0] = hx * (2 * f0_s + f1_s) / 6;
+	bLocal[1] = hx * (2 * f0_c + f1_c) / 6;
+	bLocal[2] = hx * (f0_s + 2 * f1_s) / 6;
+	bLocal[3] = hx * (f0_c + 2 * f1_c) / 6;
 }
