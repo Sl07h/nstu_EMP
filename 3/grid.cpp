@@ -19,24 +19,24 @@ void GRID::inputGrid()
 	fin.close();
 }
 
-
-void GRID::inputTime()
-{
-	string filepath;
-	if (isTimeUniform)
-		filepath = "input/uniform_time.txt";
-	else
-		filepath = "input/nonuniform_time.txt";
-
-	std::ifstream fin(filepath);
-	fin >> tFirst >> tLast;
-	fin >> tCount;
-	if (!isTimeUniform) {
-		fin >> kt;
-		nt = tCount - 1;
-	}
-	fin.close();
-}
+//
+//void GRID::inputTime()
+//{
+//	string filepath;
+//	if (isTimeUniform)
+//		filepath = "input/uniform_time.txt";
+//	else
+//		filepath = "input/nonuniform_time.txt";
+//
+//	std::ifstream fin(filepath);
+//	fin >> tFirst >> tLast;
+//	fin >> tCount;
+//	if (!isTimeUniform) {
+//		fin >> kt;
+//		nt = tCount - 1;
+//	}
+//	fin.close();
+//}
 
 
 void GRID::buildGrid()
@@ -102,57 +102,57 @@ void GRID::buildGrid()
 	}
 }
 
-
-void GRID::buildTimeGrid()
-{
-	//  tFirst         tLast
-	//	  *-------------*
-	//    0    tCount   1
-	times.resize(tCount);
-
-	if (isTimeUniform) {
-
-		ht = ((tLast - tFirst) / double(tCount - 1)) / pow(2, coefTime);
-		if (coefTime != 0)
-			width = (width - 1) * pow(2, coefTime) + 1;
-
-		size_t i, elem;
-		double t;
-		// Первый элемент
-		times[0] = tFirst;
-		i = 1;
-		for (elem = 1; elem < tCount; elem++, i++)
-			times[elem] = tFirst + ht * i;
-
-		// Последний элемент
-		times[tCount - 1] = tLast;
-	}
-
-	else {
-
-		if (coefTime != 0) {
-			width = (width - 1) * pow(2, coefTime) + 1;
-			nt *= pow(2, coefTime);
-			kt *= pow(kt, 1.0 / coefTime);
-		}
-
-		ht = (tLast - tFirst) * (1 - kt) / (1 - pow(kt, nt));
-		double t;
-		size_t i, elem;
-		i = 1;
-		dt = ht * kt;
-		t = tFirst + ht;
-		// Первый элемент
-		times[0] = tFirst;
-		for (elem = 1; elem < tCount; elem++, i++, dt *= kt)
-		{
-			times[elem] = t;
-			t += dt;
-		}
-		// Последний элемент
-		times[tCount - 1] = tLast;
-	}
-}
+//
+//void GRID::buildTimeGrid()
+//{
+//	//  tFirst         tLast
+//	//	  *-------------*
+//	//    0    tCount   1
+//	times.resize(tCount);
+//
+//	if (isTimeUniform) {
+//
+//		ht = ((tLast - tFirst) / double(tCount - 1)) / pow(2, coefTime);
+//		if (coefTime != 0)
+//			width = (width - 1) * pow(2, coefTime) + 1;
+//
+//		size_t i, elem;
+//		double t;
+//		// Первый элемент
+//		times[0] = tFirst;
+//		i = 1;
+//		for (elem = 1; elem < tCount; elem++, i++)
+//			times[elem] = tFirst + ht * i;
+//
+//		// Последний элемент
+//		times[tCount - 1] = tLast;
+//	}
+//
+//	else {
+//
+//		if (coefTime != 0) {
+//			width = (width - 1) * pow(2, coefTime) + 1;
+//			nt *= pow(2, coefTime);
+//			kt *= pow(kt, 1.0 / coefTime);
+//		}
+//
+//		ht = (tLast - tFirst) * (1 - kt) / (1 - pow(kt, nt));
+//		double t;
+//		size_t i, elem;
+//		i = 1;
+//		dt = ht * kt;
+//		t = tFirst + ht;
+//		// Первый элемент
+//		times[0] = tFirst;
+//		for (elem = 1; elem < tCount; elem++, i++, dt *= kt)
+//		{
+//			times[elem] = t;
+//			t += dt;
+//		}
+//		// Последний элемент
+//		times[tCount - 1] = tLast;
+//	}
+//}
 
 
 // Отображние сетки на экран

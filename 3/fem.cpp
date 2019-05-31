@@ -5,6 +5,7 @@
 
 
 void FEM::outputALocal() {
+	cout << endl; 
 	for (int i = 0; i < ALocal.size(); ++i) {
 		for (int j = 0; j < ALocal.size(); ++j) {
 			cout << ALocal[i][j] << "  ";
@@ -38,6 +39,7 @@ void FEM::convAToDense() {
 
 
 void FEM::outputA() {
+	cout << endl; 
 	for (int i = 0; i < A.size(); ++i) {
 		for (int j = 0; j < A.size(); ++j) {
 			cout << A[i][j] << "  ";
@@ -124,14 +126,33 @@ void FEM::buildGlobalMatrixA()
 	}*/
 
 	di.resize(2 * nodesCount, 0);
-	ia.resize(5 * nodesCount + 1);
-	ja.resize(5 * nodesCount + 1, 0);
-	al.resize(5 * nodesCount + 1, 0);
-	au.resize(5 * nodesCount + 1, 0);
-	for (size_t elemNumber = 0; elemNumber < nodesCount; elemNumber+=2)
+	ia.resize(2 * nodesCount + 1);
+	ia[0] = 0; ia[1] = 0; ia[2] = 1;
+	double iaLast = 1;
+	for (size_t i = 3; i < ia.size(); i++)
+	{
+		if (i % 2 != 0)
+			iaLast += 2;
+		else
+			iaLast += 3;
+		ia[i] = iaLast;
+	}
+	ja.resize(5 * finiteElementsCount + 1, 0);
+	ja[0] = 0;
+	for (size_t i = 1; i < ja.size(); i += 5)
+	{
+		ja[i] = ja[i - 1];
+		ja[i + 1] = ja[i - 1] + 1;
+		ja[i + 2] = ja[i - 1];
+		ja[i + 3] = ja[i - 1] + 1;
+		ja[i + 4] = ja[i - 1] + 2;
+	}
+	al.resize(5 * finiteElementsCount + 1, 0);
+	au.resize(5 * finiteElementsCount + 1, 0);
+	for (size_t elemNumber = 0; elemNumber < 2 * finiteElementsCount; elemNumber += 2)
 	{
 		buildLocalmatrixA(elemNumber);
-		
+
 		/*int k = 0;
 		for (size_t i = elemNumber * 2; i < elemNumber * 2 + 2; i++, k++) {
 			int kInternal = i * 2;
@@ -153,10 +174,10 @@ void FEM::buildGlobalMatrixA()
 			int i1 = ia[i + 1];
 			int j = ja[i0];
 			int tLocal = 0;
-			for (size_t k = i0; k < i1; k++, j++)
+			for (size_t k = i0; k < i1; k++, j++, tLocal++)
 			{
-				al[k] += ALocal[i][j];
-				au[k] += ALocal[j][i];
+				al[k] += ALocal[t][tLocal];
+				au[k] += ALocal[tLocal][t];
 			}
 		}
 
@@ -166,15 +187,19 @@ void FEM::buildGlobalMatrixA()
 	}
 
 	// Первые краевые условия
-	di[0] = 1; di[1] = 1;
+	di[0] = 1; di[1] = 1; al[0] = 0;
 	for (size_t i = 0; i < 5; i++)
 		au[i] = 0;
 
-
-	di[di.size() - 1] = 1; di[di.size() - 2] = 1;
+	di[di.size() - 1] = 1; di[di.size() - 2] = 1; au[au.size() - 1] = 0;
 	for (size_t i = 1; i < 6; i++)
-		al[al.size() - i];
+		al[al.size() - i] = 0;
+
+	convAToDense();
+	cout << endl << "Added 1st boundary conditions:" << endl;
+	outputA();
 }
+
 
 
 
@@ -192,54 +217,13 @@ void FEM::buildGlobalVectorb()
 			b[i] = bLocal[k];
 	}
 
-	/*b[0] = u(nodes[0].x, t);
-	b[nodesCount - 1] = u(nodes[nodesCount - 1].x, t);*/
+	// Первые краевые условия
+	b[0] = u_s(nodes[0].x);
+	b[1] = u_c(nodes[0].x);
+	b[b.size() - 2] = u_s(nodes[b.size() - 2].x);
+	b[b.size() - 1] = u_c(nodes[b.size() - 1].x);
 }
 
-/*
-// Вывод матрицы А в консоль
-void FEM::printGlobalMatrixA()
-{
-	ofstream fout("output/A.txt");
-	cout << fixed << setprecision(3);
-	fout << "A = [ ";
-	for (size_t i = 0; i < nodesCount; i++)
-	{
-		for (size_t j = 0; j < nodesCount; j++)
-		{
-			fout << A[i][j] << "\t";
-			cout << A[i][j] << "\t";
-		}
-		fout << ";" << endl;
-		cout << endl;
-	}
-	fout << "]";
-
-	fout << endl;
-	fout << "di = {" << di << "};" << endl;
-	fout << "al = {" << al << "};" << endl;
-	fout << "au = {" << au << "};" << endl;
-	fout.close();
-}
-
-
-// Вывод матрицы А в консоль
-void FEM::printGlobalVectorb()
-{
-	ofstream fout("output/b.txt");
-	cout << endl << fixed << setprecision(3);
-	fout << "b = [ ";
-	for (size_t i = 0; i < nodesCount; i++)
-	{
-		fout << b[i] << ";" << endl;
-		cout << b[i] << endl;
-	}
-	fout << "]";
-	fout << endl;
-	fout << "b = {" << b << "};" << endl;
-	fout.close();
-}
-*/
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------

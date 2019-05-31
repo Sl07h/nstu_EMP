@@ -49,16 +49,18 @@ void main() {
 	bool isGridUniform = true;
 	bool isTimeUniform = true;
 	double lambda = 1;
-	double	sigma = 0;
+	double	sigma = 1;
 	double omega = 1;
 	double hi = 1;
+
+	//cout << fixed << setprecision(2);
 
 	vector <function1D> u_s(3), u_c(3), f_s(3), f_c(3);
 	u_s[0] = { [](double x) -> double { return 3 * x; } };
 	u_s[1] = { [](double x) -> double { return 2 * x * x; } };
 	u_s[2] = { [](double x) -> double { return 2 * x * x * x; } };
 
-	u_c[0] = { [](double x) -> double { return x; } };
+	u_c[0] = { [](double x) -> double { return -10 * x; } };
 	u_c[1] = { [](double x) -> double { return x * x; } };
 	u_c[2] = { [](double x) -> double { return x * x* x; } };
 
@@ -68,33 +70,12 @@ void main() {
 		f_c[i] = calc_f_c(u_s[i], u_c[i], lambda, sigma, omega, hi);
 	}
 
-	vector <string> u_names = {
-		"$ 3x + t $",
-		"$ 2x ^ 2 + t $",
-		"$ x ^ 3 + t $",
-		"$ x ^ 4 + t $",
-		"$ e^x + t $",
-		"$ 3x + t $",
-		"$ 3x + t ^ 2 $",
-		"$ 3x + t ^ 3 $",
-		"$ 3x + e ^ t $",
-		"$ 3x + sin(t) $",
-		"$ e^x + t ^ 2 $",
-		"$ e^x + t ^ 3 $",
-		"$ e^x + e ^ t $",
-		"$ e^x + sin(t) $"
-	};
-
-
-
-
-
 
 	FEM fem;
 	fem.init(u_s[0], u_c[0], f_s[0], f_c[0], lambda, sigma, omega, hi, isGridUniform, isTimeUniform, 1, coefGrid, 0);
 	fem.inputGrid();
 	fem.buildGrid();
-	fem.inputTime();
-	fem.buildTimeGrid();
+	//fem.inputTime();
+	//fem.buildTimeGrid();
 	fem.solve();
 }
