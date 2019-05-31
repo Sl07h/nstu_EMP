@@ -5,7 +5,7 @@
 
 
 void FEM::outputALocal() {
-	cout << endl; 
+	cout << endl;
 	for (int i = 0; i < ALocal.size(); ++i) {
 		for (int j = 0; j < ALocal.size(); ++j) {
 			cout << ALocal[i][j] << "  ";
@@ -39,10 +39,10 @@ void FEM::convAToDense() {
 
 
 void FEM::outputA() {
-	cout << endl; 
+	cout << endl;
 	for (int i = 0; i < A.size(); ++i) {
 		for (int j = 0; j < A.size(); ++j) {
-			cout << A[i][j] << "  ";
+			cout << A[i][j] << "\t";
 		}
 		cout << endl;
 	}
@@ -94,8 +94,8 @@ void FEM::solve()
 	buildGlobalVectorb();
 
 
-	//LOS();
-	BiCG();
+	LOS();
+	//BiCG();
 
 	cout << x << endl;
 
@@ -153,16 +153,6 @@ void FEM::buildGlobalMatrixA()
 	{
 		buildLocalmatrixA(elemNumber);
 
-		/*int k = 0;
-		for (size_t i = elemNumber * 2; i < elemNumber * 2 + 2; i++, k++) {
-			int kInternal = i * 2;
-			for (size_t j = elemNumber*2; j < elemNumber *2+ 2; j++, kInternal++)
-			{
-				A[i][kInternal]
-			}
-		}*/
-
-
 		int t = 0;
 		for (size_t i = elemNumber; i < elemNumber + 4; i++, t++)
 			di[i] += ALocal[t][t];
@@ -172,9 +162,10 @@ void FEM::buildGlobalMatrixA()
 		{
 			int i0 = ia[i];
 			int i1 = ia[i + 1];
-			int j = ja[i0];
 			int tLocal = 0;
-			for (size_t k = i0; k < i1; k++, j++, tLocal++)
+			if (t < 2)
+				i0 = i1 - 1;
+			for (size_t k = i0; k < i1; k++, tLocal++)
 			{
 				al[k] += ALocal[t][tLocal];
 				au[k] += ALocal[tLocal][t];
@@ -218,10 +209,10 @@ void FEM::buildGlobalVectorb()
 	}
 
 	// Первые краевые условия
-	b[0] = u_s(nodes[0].x);
-	b[1] = u_c(nodes[0].x);
-	b[b.size() - 2] = u_s(nodes[b.size() - 2].x);
-	b[b.size() - 1] = u_c(nodes[b.size() - 1].x);
+	b[0] = u_c(nodes[0].x);
+	b[1] = u_s(nodes[0].x);
+	b[b.size() - 2] = u_c(nodes[b.size() - 2].x);
+	b[b.size() - 1] = u_s(nodes[b.size() - 1].x);
 }
 
 
@@ -235,22 +226,28 @@ void FEM::buildGlobalVectorb()
 void FEM::buildLocalmatrixA(int elemNumber)
 {
 	p00 = lambda / (hx*hx) - (omega*omega)*hi / 3;
+	p11 = p00;
 	p01 = -lambda / (hx*hx) - (omega*omega)*hi / 6;
-	c00 = omega * sigma / 6;
+	p10 = p01;
+
+	c00 = omega * sigma / 3;
+	c11 = c00;
 	c01 = omega * sigma / 6;
+	c10 = c01;
+
 	ALocal = { {p00,	-c00,	p01,	-c01},
 				{c00,	p00,	c01,	p01},
-				{p01,	-c01,	p00,	-c00},
-				{c01,	p01,	c00,	p00} };
+				{p10,	-c10,	p11,	-c11},
+				{c10,	p10,	c11,	p11} };
 }
 
 
 // Построение локального вектора b
 void FEM::buildLocalVectorb(int elemNumber)
 {
-	bLocal = { 0,0,0,0 };
-	bLocal[0] = f_s(nodes[elemNumber].x);
-	bLocal[1] = f_c(nodes[elemNumber].x);
-	bLocal[2] = f_s(nodes[elemNumber + 1].x);
-	bLocal[3] = f_c(nodes[elemNumber + 1].x);
+	bLocal = { 0, 0, 0, 0 };
+	bLocal[0] = f_c(nodes[elemNumber].x);
+	bLocal[1] = f_s(nodes[elemNumber].x);
+	bLocal[2] = f_c(nodes[elemNumber + 1].x);
+	bLocal[3] = f_s(nodes[elemNumber + 1].x);
 }

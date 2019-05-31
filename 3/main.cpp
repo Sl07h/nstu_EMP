@@ -53,7 +53,7 @@ void main() {
 	double omega = 1;
 	double hi = 1;
 
-	//cout << fixed << setprecision(2);
+	cout << fixed << setprecision(2);
 
 	vector <function1D> u_s(3), u_c(3), f_s(3), f_c(3);
 	u_s[0] = { [](double x) -> double { return 3 * x; } };

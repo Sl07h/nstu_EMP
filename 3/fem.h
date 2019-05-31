@@ -30,10 +30,11 @@ public:
 
 
 protected:
-	double p00, p01, c00, c01;
+	double	p00, p01, p10, p11,
+			c00, c01, c10, c11;
 	function1D u_s, u_c, f_s, f_c;
 	double lambda, sigma, omega, hi;
-	
+
 	double calcNormAtMainNodes(const vector1D &x) {
 		double tmp = 0;
 		for (size_t i = 0; i < x.size(); i++)
