@@ -94,20 +94,33 @@ void FEM::solve()
 	buildGlobalVectorb();
 
 
-	LOS();
-	//BiCG();
+	BiCG();
+
+	//auto result = LOSfactLUsq();
+	//cout << "Iters count: " << result.first << endl;
+
 
 	cout << endl << "Expectation:" << endl;
+	double tmp = 0.0;
 	for (size_t i = 0; i < nodesCount; i++)
 	{
-		cout << u_s(nodes[i].x) << ", ";
-		cout << u_c(nodes[i].x) << ", ";
+		//if (nodes[i].isFirstNode) {
+			tmp += pow((x[2 * i] - u_s(nodes[i].x)), 2);
+			tmp += pow((x[2 * i + 1] - u_c(nodes[i].x)), 2);
+		//}
+
+
+		cout << u_s(nodes[i].x) << "\t";
+		cout << u_c(nodes[i].x) << "\t";
 	}
+
+
 	cout << endl;
 	cout << "Reality:" << endl;
 	cout << x << endl;
-	cout << "b:" << endl;
-	cout << b << endl;
+	cout << "Norm: " << sqrt(tmp) / nodesCount;
+	//cout << "b:" << endl;
+	//cout << b << endl;
 }
 
 
@@ -178,9 +191,9 @@ void FEM::buildGlobalMatrixA()
 			}
 		}
 
-		outputALocal();
+		/*outputALocal();
 		convAToDense();
-		outputA();
+		outputA();*/
 	}
 
 	// Первые краевые условия
@@ -192,9 +205,9 @@ void FEM::buildGlobalMatrixA()
 	for (size_t i = 1; i < 6; i++)
 		al[al.size() - i] = 0;
 
-	convAToDense();
+	/*convAToDense();
 	cout << endl << "Added 1st boundary conditions:" << endl;
-	outputA();
+	outputA();*/
 }
 
 
