@@ -1,0 +1,14 @@
+d(((t-t2)(t-t1)(t-t0))/((t3-t2)(t3-t1)(t3-t0)))/dt, where t=t0
+
+
+
+d(((t-t3)(t-t1)(t-t0))/((t2-t3)(t2-t1)(t2-t0)))/dt, where t=t0
+
+
+
+d(((t-t3)(t-t2)(t-t0))/((t1-t3)(t1-t2)(t1-t0)))/dt, where t=t0
+
+
+
+d(((t-t3)(t-t2)(t-t1))/((t0-t3)(t0-t2)(t0-t1)))/dt, where t=t0
+
