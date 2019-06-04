@@ -56,7 +56,7 @@ margin=2cm
 
 \DeclareMathOperator{\sign}{sign}
 
-\newcommand{\insertTitle}[6]{
+\newcommand{\insertTitle}[5]{
 \begin{titlepage}
 	\begin{center}
     	\large
@@ -67,22 +67,24 @@ margin=2cm
 		\vfill
 		{\textbf #1}
 		
-		Лабораторная работа №#2
+		Курсовая работа
+		
+		Тема: Решение двумерной гармонической задачи при помощи четрырёхслойной неявной схемы. Базисные функции билинейные
 		\vfill
 	\end{center}
 	
 	\begin{tabular}{ m{7em}  m{7em} }
 	Факультет: & ФПМИ \\ 
-	Группа: & #3 \\  
-	Студент: & #4 \\
-	Вариант: & #5
+	Группа: & #2 \\  
+	Студент: & #3 \\
+	Вариант: & #4
 	\end{tabular}
 	\vfill
 
 \begin{center}
 Новосибирск
 
-#6
+#5
 \end{center}
 \end{titlepage}
 }
@@ -187,12 +189,12 @@ margin=2cm
 \setlength{\belowdisplayskip}{1pt}
 
 %-------------------------------------------------------------------------------
-\insertTitle{Уравнения математической физики}{3}{ПМ-63}{Кожекин М.В.}{1}{2019}
+\insertTitle{Уравнения математической физики}{ПМ-63}{Кожекин М.В.}{70}{2019}
 
 
 %-------------------------------------------------------------------------------
 \section{Цель работы}
-Разработать программу решения гармонической задачи методом конечных элементов. Сравнить прямой и итерационные методы решения получаемой в результате конечноэлементной аппроксимации СЛАУ.
+Разработать программу решения двумерной гармонической задачи методом конечных элементов. Сравнить прямой и итерационные методы решения получаемой в результате конечноэлементной аппроксимации СЛАУ.
 
 
 %-------------------------------------------------------------------------------
@@ -214,210 +216,74 @@ margin=2cm
 
 
 
-{\bf Вариант 1:}
+{\bf Вариант 70:}
 Решить одномерную гармоническую задачу в декартовых координатах, базисные функции - линейные.
 
 
 %-------------------------------------------------------------------------------
 \section{Анализ}
 
-Рассмотрим задачу для уравнения:
+\subsection{Постановка задачи}
+
+Дано гиперболическое уравнение в декартовой системе координат:
+
+\[ -div (\lambda grad u) + \gamma u + \sigma \frac{du}{dt}  + \chi \frac{d^2u}{dt^2} = f \]
+
+
+\subsection{Дискретизация по времени}
+
+\subsection{Вариационная подстановка}
+
+\subsection{Конечноэлементная дискретизация}
+
+\subsection{Локальные матрицы и вектора}
+Аналитические выражения для вычисления элементов локальных матриц:
 
 \begin{aligned}
-\chi \frac{d^{2}u}{dt^{2}} + \sigma \frac{du}{dt} - div(\lambda grad(u)) = f \\[5pt]
-\end{aligned}
-
-Решение данного уравния u и его правая часть f представимы в виде:
-
-\begin{aligned}
-u(x,y,t) = u^s sin \omega t + u^c cos \omega t \\[5pt]
-f(x,y,t) = f^s sin \omega t + f^c cos \omega t \\[5pt]
-\end{aligned}
-
-Значит исходное уравнение можно привести к системе уравнений
-
-\begin{aligned}
-- div(\lambda grad(u^s)) - \omega \sigma u^c  - \omega^2 \chi u^s = f \\[5pt]
-- div(\lambda grad(u^c)) - \omega \sigma u^s  - \omega^2 \chi u^c = f \\[5pt]
-\end{aligned}
-
-
-\begin{aligned}
-p_{ij}(q_s) &= \int_{\Omega}{\Bigl( \lambda grad\psi_i grad\psi_j - \omega^2 \chi 
-\psi_i \psi_j \Bigr) d\Omega} \\[6pt]
-c_{ij}(q_s) &= \omega \int_{\Omega}{\sigma \psi_i \psi_j d\Omega}  \\[6pt] 
-\end{aligned}
-
-Матрица конечноэлементной СЛАУ будет иметь следующую структуру:
-
-\begin{aligned}
+G_{ij} &= \int_{x_p}^{x_{p+1}} \int\limits_{y_s}^{y_{s+1}} \lambda\roubr{\frac{\psi_i}{x}\frac{\psi_j}{x} + \frac{\psi_i}{y}\frac{\psi_j}{y}} dxdy \\[5pt]
+M_{ij}^\gamma &= \int\limits_{x_p}^{x_{p+1}}\int_{y_s}^{y_{s+1}} \gamma \psi_i \psi_j dxdy \\[5pt]
+b_i &= \int_{x_p}^{x_{p+1}}\int_{y_s}^{y_{s+1}} f \psi_i \myd{x} dy \\[5pt]
+\mb{G} &= \frac{\lambda}{6}\frac{h_y}{h_x}\begin{pmatrix}
+2 & -2 & 1 & -1 \\
+-2 & 2 & -1 & 1 \\
+1 & -1 & 2 & -2 \\
+-1 & 1 & -2 & 2
+\end{pmatrix} + \frac{\lambda}{6}\frac{h_x}{h_y}\begin{pmatrix}
+2 & 1 & -2 & -1 \\
+1 & 2 & -1 & -2 \\
+-2 & -1 & 2 & 1 \\
+-1 & 2 & 1 & 2
+\end{pmatrix} \\[5pt]
+\mb{M} &= \frac{h_x h_y}{36}\begin{pmatrix}
+4 & 2 & 2 & 1 \\
+2 & 4 & 1 & 2 \\
+2 & 1 & 4 & 2 \\
+1 & 2 & 2 & 4
+\end{pmatrix} \\[5pt]
+\mb{b} &= \frac{h_x h_y}{36}\begin{pmatrix}
+4 & 2 & 2 & 1 \\
+2 & 4 & 1 & 2 \\
+2 & 1 & 4 & 2 \\
+1 & 2 & 2 & 4
+\end{pmatrix} \cdot
 \begin{pmatrix}
-	p_{00} & -c_{00} & p_{01} & -c_{01} \\
-	c_{00} & p_{00} & c_{01} & p_{01} \\
-	p_{10} & -c_{10} & p_{11} & -c_{11} \\
-	c_{10} & p_{10} & c_{11} & p_{11} \\
- \end{pmatrix} \\[6pt]
-\end{aligned}
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-\par\noindent\rule{\textwidth}{0.4pt}
-
-Выведем формулы для локальных матриц массы, жёсткости и вектора правой части.
-
-\begin{aligned}
-\frac{du}{dx} &= \frac{d\sum_{k = 0}^{1}{q_k \psi_k}}{dx} = q_0 \frac{d \psi_0}{dx} + q_1 \frac{d \psi_1}{dx} = -\frac{1}{h}q_0 + \frac{1}{h}q_1 = \frac{q_1 - q_0}{h} \\[6pt]
-G_{i,j}&=\int_{\Omega}{\lambda(\frac{du}{dx}) grad\psi_i grad\psi_j d\Omega}  \\[6pt]
-G_{0,0} &= \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_0 d\Omega} = \\[6pt]
-&= \frac{1}{h}\sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k d\Omega} = \\[6pt]
-&= \frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h} =  G_{1,1} \\[6pt]
-G_{0,1} &= \sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k grad\psi_0 grad\psi_1 d\Omega} = \\[6pt]
-&= -\frac{1}{h}\sum_{k=0}^{1} \int_{\Omega}{\lambda(\frac{q_1 - q_0}{h}) \psi_k  d\Omega} = \\[6pt]
-&= -\frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h} = G_{1,0}  \\[6pt]
-G &= \frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \\[6pt]
+f_1 \\ f_2 \\ f_3 \\ f_4
+\end{pmatrix} \\[5pt]
 \end{aligned}
 
 
 
+\subsection{Решатели}
 
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-\par\noindent\rule{\textwidth}{0.4pt}
+Для решения полученных СЛАУ использовались следующие методы:
 
-\begin{aligned}
-M_{i,j} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_i\psi_jd\Omega} \\[6pt]
-M_{0,0} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_0d\Omega} = \frac{\sigma h}{\Delta t_s} \int_0^1{\xi^2 d\xi } = \frac{\sigma h}{\Delta t_s} \frac{\xi^3}{3}\Bigr|_{0}^{1} = \frac{\sigma h}{3 \Delta t_s} = M_{1,1} \\[6pt]
-M_{0,1} &= \frac{\sigma}{\Delta t_s}\int_{\Omega}{\psi_0\psi_1d\Omega} = \frac{\sigma h}{\Delta t_s} \int_0^1{\xi(1-\xi) d\xi } = \frac{\sigma h}{\Delta t_s} \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} = \frac{\sigma h}{6 \Delta t_s} = M_{1,0} \\[6pt]
-M &= \frac{\sigma h}{6 \Delta t_s}\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} \\[6pt]
-\end{aligned}
+\begin{itemize}[noitemsep]
+\item LU-разложение
+\item локально-оптимальная схема
+\item метод бисопряжённых градиентов
+\end{itemize}
 
 
-
-
-
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-\par\noindent\rule{\textwidth}{0.4pt}
-\begin{aligned}
-b_i &= \int_{\Omega}{f_s\psi_i d\Omega}    +    \frac{1}{\Delta t_s}\int_{\Omega}{\sigma u_{q-1}^h \psi_id\Omega} \left| u_{q-1}{h} = \sum_{k=0}^1{q_{k,s-1}\psi_k} \right| \\[6pt]
-b_0 &= \sum_{k=0}^{1} \int_{\Omega} {f_k \psi_k \psi_0 d\Omega}    +    \frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_k \psi_0 d\Omega} \\[6pt]
-&= \Bigl[ f_0 \int_{\Omega}{\psi_0 \psi_0 d\Omega} + f_1 \int_{\Omega}{\psi_1 \psi_0 d\Omega} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_0 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_0 d\Omega} \Bigr] \\[6pt]
-&= h \Bigl[ f_0 \int_{0}^{1}{\xi^2 d\xi} + f_1 \int_{0}^{1}{(1-\xi) \xi d\xi} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{0}^{1}{\xi^2 d\xi} + q_{1,s-1}\int_{0}^{1}{(1-\xi) 
-\xi d\xi} \Bigr] \\[6pt]
-&= h \Bigl[ f_0 \frac{\xi^3}{3} \Bigr|_{0}^{1} + f_1 \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} \Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\frac{\xi^3}{3} \Bigr|_{0}^{1} + q_{1,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} \Bigr] \\[6pt]
-&= h \Bigl[ f_0\frac{1}{3} + f_1\frac{1}{6} \Bigr] + \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{3}q_{0,s-1}    +    \frac{1}{6}q_{1,s-1} \Bigr] \\[6pt]
-&= \frac{h}{6} \Bigl[ 2f_0 + f_1 \Bigr] + \frac{\sigma}{6 \Delta t_s} \Bigl[ 2q_{0,s-1} + q_{1,s-1} \Bigr] \\[6pt]
-b_1 &= \sum_{k=0}^{1} \int_{\Omega} {f_k \psi_k \psi_1 d\Omega}    +    \frac{\sigma}{\Delta t_s}\sum_{k=0}^{1} \int_{\Omega}{q_{k,q-1} \psi_0 \psi_1 d\Omega} = \\[6pt]
-&= \Bigl[ f_0 \int_{\Omega}{\psi_0 \psi_1 d\Omega} + f_1 \int_{\Omega}{\psi_1 \psi_1 d\Omega} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{\Omega}{\psi_0 \psi_1 d\Omega} + q_{1,s-1}\int_{\Omega}{\psi_1 \psi_1 d\Omega} \Bigr] = \\[6pt]
-&= h \Bigl[ f_0 \int_{0}^{1}{\xi (1-\xi) d\xi} + f_1 \int_{0}^{1}{(1-\xi)^2 d\xi} \Bigr]    +    \frac{\sigma}{\Delta t_s}\Bigl[ q_{0,s-1}\int_{0}^{1}{\xi (1-\xi) d\xi} + q_{1,s-1}\int_{0}^{1}{(1-\xi)^2 d\xi} \Bigr] = \\[6pt]
-&=h \Bigl[ f_0 \bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} + f_1 (1 - \xi)^3 \Bigr|_{0}^{1} \Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ q_{0,s-1}\bigl( \frac{\xi^2}{2} - \frac{\xi^3}{3} \bigr) \Bigr|_{0}^{1} + q_{1,s-1}(1 - \xi)^3 \Bigr|_{0}^{1} \Bigr] =  \\[6pt]
-&= \frac{h}{6}\Bigl[f_0\frac{1}{6}+f_1\frac{1}{3}\Bigr]    +    \frac{\sigma}{\Delta t_s} \Bigl[ \frac{1}{6}q_{0,s-1} + \frac{1}{3}q_{1,s-1} \Bigr] \\[6pt]
-&=\frac{h}{6}\Bigl[f_0+2f_1\Bigr]    +    \frac{\sigma}{6 \Delta t_s} \Bigl[ q_{0,s-1} + 2 q_{1,s-1} \Bigr] \\[6pt]
-b &= \frac{hx}{6}\begin{pmatrix} 2f_0+f_1 \\ f_0+2f_1\end{pmatrix} + \frac{\sigma}{6 \Delta t_s} \begin{pmatrix} 2q_{0,s-1} + q_{1,s-1} \\  q_{0,s-1} + 2 q_{1,s-1} \end{pmatrix} \\[6pt]
-\end{aligned}
-\par\noindent\rule{\textwidth}{0.4pt}
-
-В итоге:
-
-\begin{aligned}
-G &= \frac{\lambda_0(\frac{q_1-q_0}{h}) + \lambda_1(\frac{q_1-q_0}{h})}{2h}\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} \\[6pt]
-M &= \frac{\sigma h}{6 \Delta t_s}\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} \\[6pt]
-b &= \frac{hx}{6}\begin{pmatrix} 2f_0+f_1 \\ f_0+2f_1\end{pmatrix} + \frac{\sigma}{6 \Delta t_s} \begin{pmatrix} 2q_{0,s-1} + q_{1,s-1} \\  q_{0,s-1} + 2 q_{1,s-1} \end{pmatrix}
-\end{aligned} \\[6pt]
-\par\noindent\rule{\textwidth}{0.4pt}
-
-
-
-%
-%\section{Точность для разных функций u и $\lambda$}
-%%-------------------------------------------------------------------------------
-%
-%В ходе следующего исследования использовались следующие параметры:
-%
-%$\varepsilon = 1e-7$
-%
-%$\sigma = 1$
-%
-%$maxiter = 1000$
-%
-%$\text{Область пространства } \Omega = [0, 1]$
-%
-%$\text{Время задано на отрезке [0, 1]}$
-%
-%$\text{Первоначальное число узлов 11, а конечных элементов 10}$
-%
-%$\text{Для неравномерных сеток по времени и пространству коэффициент k=1.1}$
-%
-%\inputTable{table.txt}
-%%-------------------------------------------------------------------------------
-%\subsection{Вывод}
-%
-%Как видно из таблицы метод начинает сходиться хуже при повышении степени полинома. Если же функция $\lambda$ будет зависеть не от $\frac{du}{dx}$, а просто от u, то сходимость будет куда выше . Если функция $\lambda$ гармоническая (в нашем случае sin(u)), то метод работает хуже, хотя вообще он не должен сходиться. 
-%
-%Также стоит отметить, что и скорость программы в варианте 7 заметно ниже варианта 5. Рещение сходится медленно.
-%
-%
-%
-%%-------------------------------------------------------------------------------
-%\section{Точность решения при дроблении сетки}
-%
-%В ходе следующего исследования использовались следующие параметры:
-%
-%$\varepsilon = 1e-7$
-%
-%$\sigma = 1$
-%
-%$maxiter = 1000$, т.к. повышение этого числа не приводит к должному результату, а лишь занимает процессорное время
-%
-%$\text{Область пространства } \Omega = [0, 1]$
-%
-%$\text{Время задано на отрезке [0, 1]}$
-%
-%$\text{Первоначальное число узлов 11, а конечных элементов 10}$
-%
-%$\text{Для неравномерных сеток по времени и пространству коэффициент k=1.1}$
-%
-%Функция $\lambda(u) = u + x + 1$
-%
-%
-%\[ 3x + t \]
-%\inputTableConvergencecopy{file_u0}
-%\[ 2x^2 + t \]
-%\inputTableConvergencecopy{file_u1}
-%\[ x^3 + t \]
-%\inputTableConvergencecopy{file_u2}
-%\[ x^4 + t \]
-%\inputTableConvergencecopy{file_u3}
-%\[ e^x + t \]
-%\inputTableConvergencecopy{file_u4}
-%\[ 3x + t \]
-%\inputTableConvergencecopy{file_u5}
-%\[ 3x + t^2 \]
-%\inputTableConvergencecopy{file_u6}
-%\[ 3x + t^3 \]
-%\inputTableConvergencecopy{file_u7}
-%\[ 3x + e^t \]
-%\inputTableConvergencecopy{file_u8}
-%\[ 3x + sin(t) \]
-%\inputTableConvergencecopy{file_u9}
-%\[ e^x + t^2 \]
-%\inputTableConvergencecopy{file_u10}
-%\[ e^x + t^3 \]
-%\inputTableConvergencecopy{file_u11}
-%\[ e^x + e^t \]
-%\inputTableConvergencecopy{file_u12}
-%\[ e^x + sin(t) \]
-%\inputTableConvergencecopy{file_u13}
-%
-%
-%%-------------------------------------------------------------------------------
-%\subsection{Вывод}
-%
-%Т.к. {\bf порядок сходимости} - это степень того, насколько сильно увеличивается точность при дроблении сетки. Он определяется из степени x.
-%
-%Исходя из исследований можно заметить, что порядок сходимости $\frac{1}{3}$
 
 
 

@@ -13,6 +13,7 @@ using namespace std;
 
 typedef std::function<double(double)> function1D;
 typedef std::function<double(double, double)> function2D;
+typedef std::function<double(double, double, double)> function3D;
 
 typedef vector <double> vector1D;
 typedef vector <vector <double>> matrix2D;
@@ -90,7 +91,8 @@ inline vector1D operator-(const vector1D& a) {
 
 // Умножение матрицы на вектор
 inline vector1D operator*(const matrix2D& a, const vector1D& b) {
-	vector1D result = { 0.0, 0.0 };
+	vector1D result;
+	result.resize(b.size(), 0);
 	for (int i = 0; i < a.size(); i++)
 		for (int j = 0; j < a.size(); j++)
 			result[i] += a[i][j] * b[j];

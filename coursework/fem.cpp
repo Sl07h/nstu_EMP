@@ -4,15 +4,15 @@
 
 
 
-void FEM::outputALocal() {
-	cout << endl;
-	for (int i = 0; i < ALocal.size(); ++i) {
-		for (int j = 0; j < ALocal.size(); ++j) {
-			cout << ALocal[i][j] << "  ";
-		}
-		cout << endl;
-	}
-}
+//void FEM::outputALocal() {
+//	cout << endl;
+//	for (int i = 0; i < ALocal.size(); ++i) {
+//		for (int j = 0; j < ALocal.size(); ++j) {
+//			cout << ALocal[i][j] << "  ";
+//		}
+//		cout << endl;
+//	}
+//}
 
 void FEM::convAToDense() {
 
@@ -49,14 +49,33 @@ void FEM::outputA() {
 }
 
 
+void FEM::outputG() {
+	cout << endl;
+	for (int i = 0; i < G.size(); ++i) {
+		for (int j = 0; j < G.size(); ++j) {
+			cout << G[i][j] << "\t";
+		}
+		cout << endl;
+	}
+}
+
+void FEM::outputM() {
+	cout << endl;
+	for (int i = 0; i < M.size(); ++i) {
+		for (int j = 0; j < M.size(); ++j) {
+			cout << M[i][j] << "\t";
+		}
+		cout << endl;
+	}
+}
 
 
 
 
 // Инициализируем модель, задавая функции u, f и тип сетки
 void FEM::init(
-	function1D _u,
-	function1D _f,
+	function3D _u,
+	function3D _f,
 	double _lambda,
 	double _gamma,
 	double _sigma,
@@ -83,25 +102,30 @@ void FEM::init(
 
 void FEM::solve()
 {
-	n = 2 * nodesCount;
-	buildGlobalMatrixA();
-	buildGlobalVectorb();
+	n = nodesCount;
 
+	q1.resize(nodesCount);
+	q2.resize(nodesCount);
 
-	auto result = LOS();
-	cout << "Iters count: " << result.first << endl;
-	//BiCG();
+	for (size_t i = 0; i < heigth; i++)
+		for (size_t j = 0; j < width; j++)
+		{
+			int k = i * width + j;
+			q2[k] = u(nodes[k].x, nodes[k].y, times[0]);
+			q1[k] = u(nodes[k].x, nodes[k].y, times[1]);
+		}
 
-	cout << x << endl;
+	b2 = buildGlobalVectorb(0);
+	b1 = buildGlobalVectorb(1);
 
-	//double result = 0.0;
-	for (size_t i = 0; i < nodesCount; i++)
-	{
-		//result += pow((x[2 * i] - u_c(nodes[i].x)), 2);
+	for (size_t timeLayer = 2; timeLayer < times.size(); timeLayer++) {
+		CranckNicolson(timeLayer);
+		b2 = b1;
+		b1 = b;
 
-		cout << u(nodes[i].x) << "\t";
+		q2 = q1;
+		q1 = q;
 	}
-	//cout << sqrt(result);
 }
 
 
@@ -110,112 +134,169 @@ void FEM::solve()
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-// Строим глобальную матрицу системы нелинейных уравнений
-void FEM::buildGlobalMatrixA()
+// Строим глобальную матрицу системы нелинейных уравнений (см. с. 239)
+void FEM::CranckNicolson(int timeLayer)
 {
 	A.clear();
 	A.resize(nodesCount);
-	for (size_t i = 0; i < 2 * nodesCount; i++)
-		A[i].resize(2 * nodesCount, 0);
+	for (size_t i = 0; i < nodesCount; i++)
+		A[i].resize(nodesCount, 0);
 
-	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
+	buildGlobalMatrixG();
+	buildGlobalMatrixM();
+	b = buildGlobalVectorb(timeLayer);
+
+	t0 = times[timeLayer];
+	t1 = times[timeLayer - 1];
+	t2 = times[timeLayer - 2];
+
+	d1 = t0 - t2;
+	d2 = (t0 * (t0 - t1 - t2) + t1 * t2) / 2;
+	m1 = (t0 - t2) / (t1 - t2);
+	m2 = (t0 - t1) / (t1 - t2);
+
+
+	// Собираем левую часть
+	for (size_t i = 0; i < nodesCount; i++)
+		for (size_t j = 0; j < nodesCount; j++)
+			A[i][j] = G[i][j] / 2;
+
+	double tmp = gamma / 2 + sigma / d1 + chi / d2;
+	for (size_t i = 0; i < nodesCount; i++)
+		for (size_t j = 0; j < nodesCount; j++)
+			A[i][j] += M[i][j] * tmp;
+
+
+	// Собираем правую часть
+	b = (b + b2) / 2.0
+		- G * q2 / 2.0
+		+ M * (q1 * m1 * chi / d2 + q2 * ((-gamma / 2.0) + (sigma / d1) - (m2 * chi / d2)));
+
+	outputA();
+	cout << endl << b << endl;
+
+	// Добавляем краевые условия
+	for (size_t i = 0; i < nodesCount; i++)
 	{
-		buildLocalmatrixA(elemNumber);
-
-		int t = 0;
-		for (size_t i = elemNumber; i < elemNumber + 4; i++, t++)
-			di[i] += ALocal[t][t];
-
-		t = 0;
-		for (size_t i = elemNumber; i < elemNumber + 4; i++, t++)
-		{
-			int i0 = ia[i];
-			int i1 = ia[i + 1];
-			int tLocal = 0;
-			if (t < 2)
-				i0 = i1 - 1;
-			for (size_t k = i0; k < i1; k++, tLocal++)
-			{
-				al[k] += ALocal[t][tLocal];
-				au[k] += ALocal[tLocal][t];
-			}
+		if (nodes[i].type == 1) {
+			A[i].clear();
+			A[i].resize(nodesCount, 0);
+			A[i][i] = 1;
+			b[i] = u(nodes[i].x, nodes[i].y, t0);
 		}
-
-		outputALocal();
-		convAToDense();
-		outputA();
 	}
 
-	// Первые краевые условия
-	di[0] = 1; di[1] = 1; al[0] = 0;
-	for (size_t i = 0; i < 5; i++)
-		au[i] = 0;
 
-	di[di.size() - 1] = 1; di[di.size() - 2] = 1; au[au.size() - 1] = 0;
-	for (size_t i = 1; i < 6; i++)
-		al[al.size() - i] = 0;
-
-	convAToDense();
 	cout << endl << "Added 1st boundary conditions:" << endl;
+	cout << endl << "A:" << endl;
 	outputA();
+
+	cout << endl << b << endl;
+
+}
+
+void FEM::buildGlobalMatrixG()
+{
+	G.clear();
+	G.resize(nodesCount);
+	for (size_t i = 0; i < nodesCount; i++)
+		G[i].resize(nodesCount, 0);
+
+
+	for (size_t i = 0; i < heigth - 1; i++)
+	{
+		for (size_t j = 0; j < width - 1; j++)
+		{
+			int k = i * width + j;
+			buildLocalmatrixG(k);
+
+			vector <int> nearestNodesIndexes = { k, k + 1, k + width, k + width + 1 };
+			for (size_t i1 = 0; i1 < 4; i1++)
+				for (size_t j1 = 0; j1 < 4; j1++)
+					G[nearestNodesIndexes[i1]][nearestNodesIndexes[j1]] += GLocal[i1][j1];
+		}
+	}
+}
+
+
+
+void FEM::buildGlobalMatrixM()
+{
+	M.clear();
+	M.resize(nodesCount);
+	for (size_t i = 0; i < nodesCount; i++)
+		M[i].resize(nodesCount, 0);
+
+	for (size_t i = 0; i < heigth - 1; i++)
+	{
+		for (size_t j = 0; j < width - 1; j++)
+		{
+			int k = i * width + j;
+			buildLocalmatrixM(k);
+
+			vector <int> nearestNodesIndexes = { k, k + 1, k + width, k + width + 1 };
+			for (size_t i1 = 0; i1 < 4; i1++)
+				for (size_t j1 = 0; j1 < 4; j1++)
+					M[nearestNodesIndexes[i1]][nearestNodesIndexes[j1]] += MLocal[i1][j1];
+		}
+	}
 }
 
 
 
 
 // Строим глобальный вектор правой части системы нелинейных уравнений
-void FEM::buildGlobalVectorb()
+vector1D FEM::buildGlobalVectorb(int timeLayer)
 {
-	b.clear();
-	b.resize(2 * nodesCount, 0);
+	t = times[timeLayer];
+	tmpVector.clear();
+	tmpVector.resize(nodesCount, 0);
 
-	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
+
+	for (size_t i = 0; i < heigth - 1; i++)
 	{
-		buildLocalVectorb(elemNumber);
-		int k = 0;
-		for (size_t i = elemNumber; i < elemNumber + 4; i++, k++)
-			b[i] = bLocal[k];
+		for (size_t j = 0; j < width - 1; j++)
+		{
+			int k = i * width + j;
+			buildLocalVectorb(k);
+
+			vector <int> nearestNodesIndexes = { k, k + 1, k + width, k + width + 1 };
+			for (size_t i1 = 0; i1 < 4; i1++)
+				tmpVector[nearestNodesIndexes[i1]] += bLocal[i1];
+		}
 	}
 
-	// Первые краевые условия
-	b[0] = u(nodes[0].x);
-	b[b.size() - 1] = u(nodes[b.size() - 1].x);
+	return tmpVector;
 }
 
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-
-
-// Построение локальной матрицы
-void FEM::buildLocalmatrixA()
-{
-
-
-
-}
 
 
 
 // Построение локальной матрицы жёсткости
-void FEM::buildLocalmatrixG()
+void FEM::buildLocalmatrixG(int elemNumber)
 {
-	GLocal = { {0,0,0,0},
-				{0,0,0,0},
-				{0,0,0,0},
-				{0,0,0,0} };
+	hx = nodes[elemNumber + 1].x - nodes[elemNumber].x;
+	hy = nodes[elemNumber + width].y - nodes[elemNumber].y;
 
-	tmpLocal = { {2, -2, 1, -1},
+	GLocal = { {0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0} };
+
+	tmpMatrix = { {2, -2, 1, -1},
 				{-2, 2, -1, 1},
 				{1, -1, 2, -2},
 				{-1, 1, -2, 2} };
 
 	for (size_t i = 0; i < 4; i++)
 		for (size_t j = 0; j < 4; j++)
-			GLocal[i][j] += tmpLocal[i][j] * lambda * hy / (6 * hx);
+			GLocal[i][j] += tmpMatrix[i][j] * lambda * hy / (6 * hx);
 
-	tmpLocal = { {2, 1, -2, -1},
+	tmpMatrix = { {2, 1, -2, -1},
 				{1, 2, -1, -2},
 				{-2, -1, 2, 1},
 				{-1, -2, 1, 2} };
@@ -223,13 +304,16 @@ void FEM::buildLocalmatrixG()
 
 	for (size_t i = 0; i < 4; i++)
 		for (size_t j = 0; j < 4; j++)
-			GLocal[i][j] += tmpLocal[i][j] * lambda * hx / (6 * hy);
+			GLocal[i][j] += tmpMatrix[i][j] * lambda * hx / (6 * hy);
 }
 
 
 // Построение локальной матрицы масс
-void FEM::buildLocalmatrixM()
+void FEM::buildLocalmatrixM(int elemNumber)
 {
+	hx = nodes[elemNumber + 1].x - nodes[elemNumber].x;
+	hy = nodes[elemNumber + width].y - nodes[elemNumber].y;
+
 	MLocal = { {4, 2, 2, 1},
 				{2, 4, 1, 2},
 				{2, 1, 4, 2},
@@ -244,14 +328,17 @@ void FEM::buildLocalmatrixM()
 // Построение локального вектора b
 void FEM::buildLocalVectorb(int elemNumber)
 {
-	bLocal = { 0, 0, 0, 0 };
-	f1 = f(nodes[elemNumber].x);
-	f2 = f(nodes[elemNumber + 1].x);
-	f3 = f(nodes[elemNumber + 2].x);
-	f4 = f(nodes[elemNumber + 3].x);
+	hx = nodes[elemNumber + 1].x - nodes[elemNumber].x;
+	hy = nodes[elemNumber + width].y - nodes[elemNumber].y;
 
-	bLocal[0] = 4 * f1 + 2 * f2 + 2 * f3 + 1 * f4;
-	bLocal[1] = 2 * f1 + 4 * f2 + 1 * f3 + 2 * f4;
-	bLocal[2] = 2 * f1 + 1 * f2 + 4 * f3 + 2 * f4;
-	bLocal[3] = 1 * f1 + 2 * f2 + 2 * f3 + 4 * f4;
+	bLocal = { 0, 0, 0, 0 };
+	f1 = f(nodes[elemNumber].x, nodes[elemNumber].y, t);
+	f2 = f(nodes[elemNumber + 1].x, nodes[elemNumber + 1].y, t);
+	f3 = f(nodes[elemNumber + width].x, nodes[elemNumber + width].y, t);
+	f4 = f(nodes[elemNumber + width + 1].x, nodes[elemNumber + width + 1].y, t);
+
+	bLocal[0] = (hx*hy / 36) * (4 * f1 + 2 * f2 + 2 * f3 + 1 * f4);
+	bLocal[1] = (hx*hy / 36) * (2 * f1 + 4 * f2 + 1 * f3 + 2 * f4);
+	bLocal[2] = (hx*hy / 36) * (2 * f1 + 1 * f2 + 4 * f3 + 2 * f4);
+	bLocal[3] = (hx*hy / 36) * (1 * f1 + 2 * f2 + 2 * f3 + 4 * f4);
 }

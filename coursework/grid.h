@@ -5,8 +5,8 @@
 struct NODE {
 
 	bool isFirstNode = false;
-	int i;
-	double x;
+	int i, j;
+	double x, y;
 	int type = -9000;		// -9000	начение при инициализации
 							// -1		фиктивный узел
 							// 0		внутренний узел

@@ -8,8 +8,8 @@ class FEM : public GRID, public SOLVER {
 public:
 
 	void init(
-		function1D _u,
-		function1D _f,
+		function3D _u,
+		function3D _f,
 		double _lambda,
 		double _gamma,
 		double _sigma,
@@ -23,14 +23,18 @@ public:
 	inline int getNodesCount() { return nodesCount; }
 	void convAToDense();
 	void outputA();
-	void outputALocal();
+	void outputG();
+	void outputM();
 
 
 protected:
 	double	p00, p01, p10, p11,
-			c00, c01, c10, c11;
-	function1D u, f;
+		c00, c01, c10, c11;
+	function3D u, f;
 	double lambda, gamma, sigma, chi;
+	double t, dt;
+	double t0, t1, t2;
+	double d1, d2, m1, m2;
 
 	/*double calcNormAtMainNodes(const vector1D &x) {
 		double tmp = 0;
@@ -42,17 +46,19 @@ protected:
 		return sqrt(tmp) / nodes.size();
 	}*/
 
-	void buildGlobalMatrixA();
-	void buildGlobalVectorb();
+	void CranckNicolson(int timeLayer);
+	void buildGlobalMatrixG();
+	void buildGlobalMatrixM();
+	vector1D buildGlobalVectorb(int timeLayer);
 	/*void printGlobalMatrixA();
 	void printGlobalVectorb();*/
 
-	void buildLocalmatrixA();
 	void buildLocalVectorb(int elemNumber);
-	void buildLocalmatrixG();
-	void buildLocalmatrixM();
+	void buildLocalmatrixG(int elemNumber);
+	void buildLocalmatrixM(int elemNumber);
 
 	double f1, f2, f3, f4;
-	matrix2D ALocal, GLocal, MLocal, tmpLocal;
-	vector1D bLocal;
+	matrix2D A, G, M;
+	matrix2D GLocal, MLocal, tmpMatrix;
+	vector1D bLocal, tmpVector;
 };

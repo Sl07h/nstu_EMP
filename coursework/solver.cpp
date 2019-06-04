@@ -284,10 +284,8 @@ pair<int, double> SOLVER::LOSfactD() {
 		z = tmp + beta * z;
 
 
-		quantityOfActions += 2 * n;
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			cout << quantityOfActions << endl;
 			return make_pair(i, relativeDiscrepancy);
 		}
 		xprev = x;
@@ -300,8 +298,6 @@ pair<int, double> SOLVER::LOSfactD() {
 
 // Локально - оптимальная схема с неполной факторизацией LU(sq)
 pair<int, double> SOLVER::LOSfactLUsq() {
-
-	quantityOfActions = 0;
 
 	x.clear();						// Задаём начальное приближение
 	x.resize(n, 0);					// x_0 = (0, 0, ...)
@@ -317,7 +313,6 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 	for (int i = 0; i < maxiter; ++i) {
 
-		quantityOfActions += 18 * n;
 		double pp = p * p;
 		double alpha = (p*r) / pp;
 		x = x + alpha * z;
@@ -334,9 +329,7 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
-		quantityOfActions += 2 * n;
 		if (x == xprev || relativeDiscrepancy < E) {
-			cout << quantityOfActions << endl;
 			return make_pair(i, relativeDiscrepancy);
 		}
 		xprev = x;
