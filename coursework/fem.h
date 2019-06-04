@@ -51,7 +51,8 @@ protected:
 	}*/
 
 	void CranckNicolson(int timeLayer);
-	void implicitCheme(int timeLayer);
+	void implicitCheme3(int timeLayer);
+	void implicitCheme4(int timeLayer);
 
 	void buildGlobalMatrixG();
 	void buildGlobalMatrixM();
