@@ -106,28 +106,23 @@ void FEM::solve()
 
 	q1.resize(nodesCount);
 	q2.resize(nodesCount);
-	//q3.resize(nodesCount);
+	q3.resize(nodesCount);
 
 	for (size_t i = 0; i < heigth; i++)
 		for (size_t j = 0; j < width; j++)
 		{
 			int k = i * width + j;
-			q2[k] = u(nodes[k].x, nodes[k].y, times[0]);
-			q1[k] = u(nodes[k].x, nodes[k].y, times[1]);
-			/*q3[k] = u(nodes[k].x, nodes[k].y, times[0]);
+			q3[k] = u(nodes[k].x, nodes[k].y, times[0]);
 			q2[k] = u(nodes[k].x, nodes[k].y, times[1]);
-			q1[k] = u(nodes[k].x, nodes[k].y, times[2]);*/
+			q1[k] = u(nodes[k].x, nodes[k].y, times[2]);
 		}
 
-	/*b3 = buildGlobalVectorb(0);
+	b3 = buildGlobalVectorb(0);
 	b2 = buildGlobalVectorb(1);
-	b1 = buildGlobalVectorb(2);*/
-	b2 = buildGlobalVectorb(0);
-	b1 = buildGlobalVectorb(1);
+	b1 = buildGlobalVectorb(2);
 
-	for (size_t timeLayer = 2; timeLayer < times.size(); timeLayer++) {
-		//CranckNicolson(timeLayer);
-		implicitCheme3(timeLayer);
+	for (size_t timeLayer = 3; timeLayer < times.size(); timeLayer++) {
+		implicitCheme4(timeLayer);
 
 		for (int j = 0; j < A.size(); ++j) {
 			for (int i = j + 1; i < A.size(); ++i) {
@@ -155,17 +150,80 @@ void FEM::solve()
 		}
 		q = x;
 
-		//b3 = b2;
+		b3 = b2;
 		b2 = b1;
 		b1 = b;
 
-		//q3 = q2;
+		q3 = q2;
 		q2 = q1;
 		q1 = q;
 
-		cout << q;
+		//cout << endl << "q:" << endl << q << endl;
+		cout << endl << "Residual: " << endl << calcNormAtMainNodes(q, t0);
 	}
 }
+
+
+void FEM::solveParabolic()
+{
+	n = nodesCount;
+
+	q1.resize(nodesCount);
+	q2.resize(nodesCount);
+
+	for (size_t i = 0; i < heigth; i++)
+		for (size_t j = 0; j < width; j++)
+		{
+			int k = i * width + j;
+			q2[k] = u(nodes[k].x, nodes[k].y, times[0]);
+			q1[k] = u(nodes[k].x, nodes[k].y, times[1]);
+		}
+
+	b2 = buildGlobalVectorb(0);
+	b1 = buildGlobalVectorb(1);
+
+	for (size_t timeLayer = 2; timeLayer < times.size(); timeLayer++) {
+		implicitCheme3(timeLayer);
+		//implicitCheme3Parabolic(timeLayer);
+		//CranckNicolson(timeLayer);
+
+		for (int j = 0; j < A.size(); ++j) {
+			for (int i = j + 1; i < A.size(); ++i) {
+
+				double toMult = A[i][j] / A[j][j];
+
+				for (int k = 0; k < A.size(); ++k)
+					A[i][k] -= toMult * A[j][k];
+
+				b[i] -= toMult * b[j];
+			}
+		}
+
+
+		vector <double> x;
+		x.resize(A.size(), 0);
+
+		for (int i = n - 1; i >= 0; --i) {
+
+			double tmp = 0.0;
+			for (int j = i + 1; j < A.size(); ++j) {
+				tmp += A[i][j] * x[j];
+			}
+			x[i] = (b[i] - tmp) / A[i][i];
+		}
+		q = x;
+
+		b2 = b1;
+		b1 = b;
+
+		q2 = q1;
+		q1 = q;
+
+		//cout << endl << "q:" << endl << q << endl;
+		cout << endl << "Residual: " << endl << calcNormAtMainNodes(q, t0);
+	}
+}
+
 
 
 
@@ -211,8 +269,8 @@ void FEM::CranckNicolson(int timeLayer)
 		- G * q2 / 2.0
 		+ M * (q1 * m1 * chi / d2 + q2 * ((-gamma / 2.0) + (sigma / d1) - (m2 * chi / d2)));
 
-	outputA();
-	cout << endl << b << endl;
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
 
 	// Добавляем краевые условия
 	for (size_t i = 0; i < nodesCount; i++)
@@ -226,11 +284,11 @@ void FEM::CranckNicolson(int timeLayer)
 	}
 
 
-	cout << endl << "Added 1st boundary conditions:" << endl;
+	/*cout << endl << "Added 1st boundary conditions:" << endl;
 	cout << endl << "A:" << endl;
-	outputA();
+	outputA();*/
 
-	cout << endl << b << endl;
+	//cout << endl << "b:" << endl << b << endl;
 
 }
 
@@ -271,12 +329,12 @@ void FEM::implicitCheme3(int timeLayer)
 
 
 	// Собираем правую часть
-	b = b
-		- (2 * chi / (t01 + t02) + sigma * t01 / (t02 * t12)) * M * q2
-		- (2 * chi / (t01 + t12) + sigma * t02 / (t01 * t12)) * M * q1;
+	b = b - (2 * chi / (t01 * t02) + sigma * t01 / (t02 * t12)) * M * q2
+		- (2 * chi / (t01 * t12) + sigma * t02 / (t01 * t12)) * M * q1;
 
-	outputA();
-	cout << endl << b << endl;
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
+
 
 	// Добавляем краевые условия
 	for (size_t i = 0; i < nodesCount; i++)
@@ -290,15 +348,71 @@ void FEM::implicitCheme3(int timeLayer)
 	}
 
 
-	cout << endl << "Added 1st boundary conditions:" << endl;
-	cout << endl << "A:" << endl;
-	outputA();
+	//cout << endl << "Added 1st boundary conditions:" << endl;
+	//cout << endl << "A:" << endl;
+	//outputA();
 
-	cout << endl << b << endl;
+	//cout << endl << "b:" << endl << b << endl;
 
 }
 
 
+void FEM::implicitCheme3Parabolic(int timeLayer)
+{
+	A.clear();
+	A.resize(nodesCount);
+	for (size_t i = 0; i < nodesCount; i++)
+		A[i].resize(nodesCount, 0);
+
+	buildGlobalMatrixG();
+	buildGlobalMatrixM();
+	b = buildGlobalVectorb(timeLayer);
+
+	t0 = times[timeLayer];
+	t1 = times[timeLayer - 1];
+	t2 = times[timeLayer - 2];
+
+
+	t01 = t0 - t1;
+	t02 = t0 - t2;
+	t20 = t2 - t0;
+	t21 = t2 - t1;
+	t10 = t1 - t0;
+	t12 = t1 - t2;
+
+
+
+	// Собираем левую часть
+	double tmp = sigma * (t02 + t01) / (t02 * t01) + gamma;
+	for (size_t i = 0; i < nodesCount; i++)
+		for (size_t j = 0; j < nodesCount; j++)
+			A[i][j] += M[i][j] * tmp + G[i][j];
+
+
+	// Собираем правую часть
+	b = b
+		- (sigma * t01 / (t02 * t12)) * M * q2
+		+ (sigma * t02 / (t01 * t12)) * M * q1;
+
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
+
+	// Добавляем краевые условия
+	for (size_t i = 0; i < nodesCount; i++)
+	{
+		if (nodes[i].type == 1) {
+			A[i].clear();
+			A[i].resize(nodesCount, 0);
+			A[i][i] = 1;
+			b[i] = u(nodes[i].x, nodes[i].y, t0);
+		}
+	}
+
+	//cout << endl << "Added 1st boundary conditions:" << endl;
+	//cout << endl << "A:" << endl;
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
+}
 
 // Строим глобальную матрицу системы нелинейных уравнений (см. с. 239)
 void FEM::implicitCheme4(int timeLayer)
@@ -334,7 +448,7 @@ void FEM::implicitCheme4(int timeLayer)
 
 	// Собираем левую часть
 	double tmp = 2 * chi * (t01 + t02 + t03) / (t01 * t02 * t03)
-		+ sigma * (1.0 / t01 + 1.0 / t02 + 1.0 / t03) + gamma;
+				+ sigma * (1.0 / t01 + 1.0 / t02 + 1.0 / t03) + gamma;
 	for (size_t i = 0; i < nodesCount; i++)
 		for (size_t j = 0; j < nodesCount; j++)
 			A[i][j] += M[i][j] * tmp + G[i][j];
@@ -342,12 +456,12 @@ void FEM::implicitCheme4(int timeLayer)
 
 	// Собираем правую часть
 	b = b
-		- (chi * (t01 + t02) / (t32 * t31 * t30) + sigma * (t01 * t02) / (t32 * t31 * t30)) * M * q3
-		- (chi * (t01 + t03) / (t23 * t21 * t20) + sigma * (t01 * t03) / (t23 * t21 * t20)) * M * q2
-		- (chi * (t02 + t03) / (t13 * t12 * t10) + sigma * (t02 * t03) / (t13 * t12 * t10)) * M * q1;
+		+ (2 * chi * (t01 + t02) / (t03 * t13 * t23) + sigma * (t01 * t02) / (t03 * t13 * t23)) * M * q3
+		- (2 * chi * (t01 + t03) / (t02 * t12 * t23) + sigma * (t01 * t03) / (t02 * t12 * t23)) * M * q2
+		+ (2 * chi * (t02 + t03) / (t01 * t12 * t13) + sigma * (t02 * t03) / (t01 * t12 * t13)) * M * q1;
 
-	outputA();
-	cout << endl << b << endl;
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
 
 	// Добавляем краевые условия
 	for (size_t i = 0; i < nodesCount; i++)
@@ -360,13 +474,10 @@ void FEM::implicitCheme4(int timeLayer)
 		}
 	}
 
-
-	cout << endl << "Added 1st boundary conditions:" << endl;
-	cout << endl << "A:" << endl;
-	outputA();
-
-	cout << endl << b << endl;
-
+	//cout << endl << "Added 1st boundary conditions:" << endl;
+	//cout << endl << "A:" << endl;
+	//outputA();
+	//cout << endl << "b:" << endl << b << endl;
 }
 
 

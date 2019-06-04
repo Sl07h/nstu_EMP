@@ -50,10 +50,11 @@ void main() {
 	double	sigma = 1;
 	double chi = 1;
 
-	cout << fixed << setprecision(4);
+	cout << fixed << scientific;
+	//cout << fixed << setprecision(4);
 
 	vector <function3D> u(3), f(3);
-	u[0] = { [](double x, double y, double t) -> double { return x * x + y * y + t * t; } };
+	u[0] = { [](double x, double y, double t) -> double { return pow(x,2) + pow(y,2) + pow(t,3); } };
 	u[1] = { [](double x, double y, double t) -> double { return 2 * x * x; } };
 	u[2] = { [](double x, double y, double t) -> double { return 2 * x * x * x; } };
 
@@ -74,7 +75,9 @@ void main() {
 	fem.buildGrid();
 	fem.inputTime();
 	fem.buildTimeGrid();
+	//fem.solveParabolic();
 	fem.solve();
+
 
 	/*fem.saveGridAndBorder(gridFile, gridBorderFile);
 	string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
