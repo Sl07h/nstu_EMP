@@ -29,11 +29,15 @@ public:
 
 protected:
 	double	p00, p01, p10, p11,
-		c00, c01, c10, c11;
+			c00, c01, c10, c11;
 	function3D u, f;
 	double lambda, gamma, sigma, chi;
 	double t, dt;
-	double t0, t1, t2;
+	double t0, t1, t2, t3;
+	double  t01, t02, t03,
+			t20, t21, t23,
+			t30, t31, t32,
+			t10, t12, t13;
 	double d1, d2, m1, m2;
 
 	/*double calcNormAtMainNodes(const vector1D &x) {
@@ -47,6 +51,8 @@ protected:
 	}*/
 
 	void CranckNicolson(int timeLayer);
+	void implicitCheme(int timeLayer);
+
 	void buildGlobalMatrixG();
 	void buildGlobalMatrixM();
 	vector1D buildGlobalVectorb(int timeLayer);

@@ -31,12 +31,12 @@ public:
 	void setE(double new_E) { E = new_E; }
 
 protected:
-	vector1D q, q1, q2;
+	vector1D q, q1, q2, q3;
 	vector1D di, al, au, di_f, al_f, au_f;
 	vector <int> ia, ja;
 	int n, maxiter;
 	double E, delta;
-	vector1D x, r, z, p, b, b1, b2, bTmp;
+	vector1D x, r, z, p, b, b1, b2, b3, bTmp;
 
 
 	vector1D multA(const vector1D&x);

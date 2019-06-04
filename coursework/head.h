@@ -99,6 +99,18 @@ inline vector1D operator*(const matrix2D& a, const vector1D& b) {
 	return result;
 }
 
+// Умножение матрицы на вектор
+inline matrix2D operator*(const matrix2D& a, double b) {
+	matrix2D result = a;
+	for (int i = 0; i < a.size(); i++)
+		for (int j = 0; j < a.size(); j++)
+			result[i][j] *= b;
+	return result;
+}
+// Умножение на число
+inline matrix2D operator*(double b, const matrix2D& a) {
+	return operator*(a, b);
+}
 
 
 // Умножение на число

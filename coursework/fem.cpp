@@ -106,23 +106,28 @@ void FEM::solve()
 
 	q1.resize(nodesCount);
 	q2.resize(nodesCount);
+	q3.resize(nodesCount);
 
 	for (size_t i = 0; i < heigth; i++)
 		for (size_t j = 0; j < width; j++)
 		{
 			int k = i * width + j;
-			q2[k] = u(nodes[k].x, nodes[k].y, times[0]);
-			q1[k] = u(nodes[k].x, nodes[k].y, times[1]);
+			q3[k] = u(nodes[k].x, nodes[k].y, times[0]);
+			q2[k] = u(nodes[k].x, nodes[k].y, times[1]);
+			q1[k] = u(nodes[k].x, nodes[k].y, times[2]);
 		}
 
-	b2 = buildGlobalVectorb(0);
-	b1 = buildGlobalVectorb(1);
+	b3 = buildGlobalVectorb(0);
+	b2 = buildGlobalVectorb(1);
+	b1 = buildGlobalVectorb(2);
 
-	for (size_t timeLayer = 2; timeLayer < times.size(); timeLayer++) {
+	for (size_t timeLayer = 3; timeLayer < times.size(); timeLayer++) {
 		CranckNicolson(timeLayer);
+		b3 = b2;
 		b2 = b1;
 		b1 = b;
 
+		q3 = q2;
 		q2 = q1;
 		q1 = q;
 	}
@@ -194,6 +199,76 @@ void FEM::CranckNicolson(int timeLayer)
 	cout << endl << b << endl;
 
 }
+
+
+// Строим глобальную матрицу системы нелинейных уравнений (см. с. 239)
+void FEM::implicitCheme(int timeLayer)
+{
+	A.clear();
+	A.resize(nodesCount);
+	for (size_t i = 0; i < nodesCount; i++)
+		A[i].resize(nodesCount, 0);
+
+	buildGlobalMatrixG();
+	buildGlobalMatrixM();
+	b = buildGlobalVectorb(timeLayer);
+
+	t0 = times[timeLayer];
+	t1 = times[timeLayer - 1];
+	t2 = times[timeLayer - 2];
+	t2 = times[timeLayer - 3];
+	
+	t01 = t0 - t1;
+	t02 = t0 - t2;
+	t03 = t0 - t3;
+	t20 = t2 - t0;
+	t21 = t2 - t1;
+	t23 = t2 - t3;
+	t30 = t3 - t0;
+	t31 = t3 - t1;
+	t32 = t3 - t2;
+	t13 = t1 - t3;
+
+
+
+	// Собираем левую часть
+	double tmp = 2 * chi * (t01 + t02 + t03) / (t01 * t02 * t03)
+		+ sigma * (t01 * t02 + t01 * t03 + t02 * t03) / (t01 * t02 * t03) + gamma;
+	for (size_t i = 0; i < nodesCount; i++)
+		for (size_t j = 0; j < nodesCount; j++)
+			A[i][j] += M[i][j] * tmp + G[i][j];
+
+
+	// Собираем правую часть
+	b = b
+		- (chi * (t01 + t02) / (t32 * t31 * t30) + sigma * (t01 * t02) / (t32 * t31 * t30)) * M * q3
+		- (chi * (t01 + t03) / (t23 * t21 * t20) + sigma * (t01 * t03) / (t23 * t21 * t20)) * M * q2
+		- (chi * (t02 + t03) / (t13 * t12 * t10) + sigma * (t02 * t03) / (t13 * t12 * t10)) * M * q1;
+
+	outputA();
+	cout << endl << b << endl;
+
+	// Добавляем краевые условия
+	for (size_t i = 0; i < nodesCount; i++)
+	{
+		if (nodes[i].type == 1) {
+			A[i].clear();
+			A[i].resize(nodesCount, 0);
+			A[i][i] = 1;
+			b[i] = u(nodes[i].x, nodes[i].y, t0);
+		}
+	}
+
+
+	cout << endl << "Added 1st boundary conditions:" << endl;
+	cout << endl << "A:" << endl;
+	outputA();
+
+	cout << endl << b << endl;
+
+}
+
+
 
 void FEM::buildGlobalMatrixG()
 {
