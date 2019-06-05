@@ -20,7 +20,6 @@ public:
 		int _coefTime
 	);
 	double solve();
-	void solveParabolic();
 	inline int getNodesCount() { return nodesCount; }
 	void convAToDense();
 	void outputA();
@@ -30,15 +29,13 @@ public:
 
 protected:
 	double	p00, p01, p10, p11,
-		c00, c01, c10, c11;
+			c00, c01, c10, c11;
 	function3D u, f;
 	double lambda, gamma, sigma, chi;
 	double t, dt;
 	double t0, t1, t2, t3;
 	double  t01, t02, t03,
-		t20, t21, t23,
-		t30, t31, t32,
-		t10, t12, t13;
+			t23, t12, t13;
 	double d1, d2, m1, m2;
 
 	double calcNormAtMainNodes(const vector1D &x, int time) {
@@ -48,16 +45,11 @@ protected:
 		return sqrt(normE) / nodes.size();
 	}
 
-	void CranckNicolson(int timeLayer);
-	void implicitCheme3(int timeLayer);
-	void implicitCheme3Parabolic(int timeLayer);
 	void implicitCheme4(int timeLayer);
 
 	void buildGlobalMatrixG();
 	void buildGlobalMatrixM();
 	vector1D buildGlobalVectorb(int timeLayer);
-	/*void printGlobalMatrixA();
-	void printGlobalVectorb();*/
 
 	void buildLocalVectorb(int elemNumber);
 	void buildLocalmatrixG(int elemNumber);

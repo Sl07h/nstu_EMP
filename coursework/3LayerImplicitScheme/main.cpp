@@ -65,7 +65,6 @@ void main() {
 	double chi = 1;
 
 	cout << setprecision(3) << scientific;
-	//cout << fixed << setprecision(4);
 
 	string prefix = "";
 	if (!isGridUniform)
@@ -126,7 +125,6 @@ void main() {
 				fem.buildGrid();
 				fem.inputTime();
 				fem.buildTimeGrid();
-				//fem.solveParabolic();
 				if (j != 7)
 					table1 << fem.solve() << "\t";
 				else
@@ -144,52 +142,4 @@ void main() {
 	reseacrhConvergence(false, true);
 	reseacrhConvergence(false, false);
 
-}
-
-
-
-
-void main2() {
-
-	int coefGrid = 0;
-	int coefTime = 0;
-	bool isGridUniform = true;
-	bool isTimeUniform = true;
-	double lambda = 1;
-	double gamma = 1;
-	double	sigma = 1;
-	double chi = 1;
-
-	cout << fixed << scientific;
-	//cout << fixed << setprecision(4);
-
-	vector <function3D> u(3), f(3);
-	u[0] = { [](double x, double y, double t) -> double { return pow(x,2) + pow(y,2) + pow(t,3); } };
-	u[1] = { [](double x, double y, double t) -> double { return 2 * x * x; } };
-	u[2] = { [](double x, double y, double t) -> double { return 2 * x * x * x; } };
-
-	for (size_t i = 0; i < 3; i++)
-		f[i] = calc_f(u[i], lambda, gamma, sigma, chi);
-
-	string prefix = "";
-	if (!isGridUniform)
-		prefix = "Non";
-	string gridFile = "grids/" + prefix + "Uniform_" + to_string(coefGrid) + ".txt";
-	string gridBorderFile = "grids/Border" + prefix + "Uniform_" + to_string(coefGrid) + ".txt";
-
-
-	int i = 0;
-	FEM fem;
-	fem.init(u[i], f[i], lambda, gamma, sigma, chi, isGridUniform, isTimeUniform, coefGrid, coefTime);
-	fem.inputGrid();
-	fem.buildGrid();
-	fem.inputTime();
-	fem.buildTimeGrid();
-	//fem.solveParabolic();
-	fem.solve();
-
-
-	/*fem.saveGridAndBorder(gridFile, gridBorderFile);
-	string runVisualisation = "python plot.py " + gridFile + " " + gridBorderFile;
-	system(runVisualisation.c_str());*/
 }
