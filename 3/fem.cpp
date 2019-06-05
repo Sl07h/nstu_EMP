@@ -87,40 +87,28 @@ void FEM::init(
 	coefTime = _coefTime;
 }
 
-void FEM::solve()
+pair<int, double> FEM::solve(int solver)
 {
+	pair<int, double> result;
 	n = 2 * nodesCount;
 	buildGlobalMatrixA();
 	buildGlobalVectorb();
 
-
-	BiCG();
-
-	//auto result = LOSfactLUsq();
-	//cout << "Iters count: " << result.first << endl;
-
-
-	cout << endl << "Expectation:" << endl;
-	double tmp = 0.0;
-	for (size_t i = 0; i < nodesCount; i++)
+	switch (solver)
 	{
-		//if (nodes[i].isFirstNode) {
-			tmp += pow((x[2 * i] - u_s(nodes[i].x)), 2);
-			tmp += pow((x[2 * i + 1] - u_c(nodes[i].x)), 2);
-		//}
-
-
-		cout << u_s(nodes[i].x) << "\t";
-		cout << u_c(nodes[i].x) << "\t";
+	case 1:
+		result = LOSfactLUsq();
+		break;
+	case 2:
+		result = BiCG();
+		break;
+	case 3:
+		//result = BiCG();
+		break;
+	default:
+		break;
 	}
-
-
-	cout << endl;
-	cout << "Reality:" << endl;
-	cout << x << endl;
-	cout << "Norm: " << sqrt(tmp) / nodesCount;
-	//cout << "b:" << endl;
-	//cout << b << endl;
+	return result;
 }
 
 
@@ -219,17 +207,17 @@ void FEM::buildGlobalVectorb()
 	b.clear();
 	b.resize(2 * nodesCount, 0);
 
-	for (size_t elemNumber = 0; elemNumber < 2 * finiteElementsCount; elemNumber += 2)
+	for (size_t elemNumber = 0; elemNumber < finiteElementsCount; elemNumber++)
 	{
-		buildLocalVectorb(elemNumber / 2);
+		buildLocalVectorb(elemNumber);
 		int k = 0;
 		for (size_t i = elemNumber; i < elemNumber + 4; i++, k++)
-			b[i] += bLocal[k];
+			b[i] = bLocal[k];
 	}
 
 	// Первые краевые условия
-	b[0] = u_s(nodes[0].x);
-	b[1] = u_c(nodes[0].x);
+	b[0] = u_c(nodes[0].x);
+	b[1] = u_s(nodes[0].x);
 	b[b.size() - 2] = u_s(nodes[nodes.size() - 1].x);
 	b[b.size() - 1] = u_c(nodes[nodes.size() - 1].x);
 }
@@ -244,14 +232,14 @@ void FEM::buildGlobalVectorb()
 // Построение локальной матрицы А
 void FEM::buildLocalmatrixA(int elemNumber)
 {
-	p00 = lambda / hx - omega * omega * hi * hx / 3;
+	p00 = lambda / (hx*hx) - (omega*omega)*hi / 3;
 	p11 = p00;
-	p01 = -lambda / hx - omega * omega * hi * hx / 6;
+	p01 = -lambda / (hx*hx) - (omega*omega)*hi / 6;
 	p10 = p01;
 
-	c00 = omega * sigma * hx / 3;
+	c00 = omega * sigma / 3;
 	c11 = c00;
-	c01 = omega * sigma * hx / 6;
+	c01 = omega * sigma / 6;
 	c10 = c01;
 
 	ALocal = { {p00,	-c00,	p01,	-c01},

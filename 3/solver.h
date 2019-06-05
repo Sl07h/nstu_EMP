@@ -7,7 +7,7 @@ class SOLVER {
 
 public:
 	void initSLAE();
-	void BiCG();
+	
 	
 
 	void getVectX(vector1D &x) { x = b; };
@@ -26,6 +26,7 @@ public:
 	pair<int, double> LOS();
 	pair<int, double> LOSfactD();
 	pair<int, double> LOSfactLUsq();
+	pair<int, double> BiCG();
 	void clearAll();
 	void setMaxiter(int new_maxiter) { maxiter = new_maxiter; }
 	void setE(double new_E) { E = new_E; }
@@ -36,7 +37,7 @@ protected:
 	vector <int> ia, ja;
 	int n, maxiter;
 	double E, delta;
-	vector1D x, xprev, r, z, p, b, bTmp;
+	vector1D x, r, z, p, b, bTmp;
 
 
 	vector1D multA(const vector1D&x);

@@ -1,20 +1,16 @@
 #include "solver.h"
 
-int quantityOfActions;
-
 
 
 // A*x = b, где x - произвольный вектор
 vector1D SOLVER::multA(const vector1D& x) {
 
 	vector1D result(n);
-	quantityOfActions += n;
 	for (int i = 0; i < n; ++i) {
 
 		result[i] = di[i] * x[i];
 		int i0 = ia[i];
 		int i1 = ia[i + 1];
-		quantityOfActions += 4 * (i1 - i0);
 
 		for (int k = i0; k < i1; ++k) {
 
@@ -224,7 +220,7 @@ pair<int, double> SOLVER::LOS() {
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
 	r.resize(n);
 
-	xprev = x;
+	vector1D xprev = x;
 	r = b - multA(x);	// r_0 = b - A*x_0
 	z = r;				// z_0 = r_0
 	p = multA(z);		// p_0 = A*z_0
@@ -257,11 +253,9 @@ pair<int, double> SOLVER::LOS() {
 // Локально - оптимальная схема c неполной диагональной факторизацией
 pair<int, double> SOLVER::LOSfactD() {
 
-	quantityOfActions = 0;
-
 	x.clear();			// Задаём начальное приближение
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
-	xprev = x;
+	vector1D xprev = x;
 	decomposionD();
 
 	r = b - multA(x);	// r_0 = b - A*x_0
@@ -273,7 +267,6 @@ pair<int, double> SOLVER::LOSfactD() {
 
 	for (int i = 0; i < maxiter; ++i) {
 
-		quantityOfActions += 17 * n;
 		double pp = p * p;
 		double alpha = (p*r) / pp;
 		x = x + alpha * z;
@@ -289,10 +282,8 @@ pair<int, double> SOLVER::LOSfactD() {
 		z = tmp + beta * z;
 
 
-		quantityOfActions += 2 * n;
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			cout << quantityOfActions << endl;
 			return make_pair(i, relativeDiscrepancy);
 		}
 		xprev = x;
@@ -306,11 +297,9 @@ pair<int, double> SOLVER::LOSfactD() {
 // Локально - оптимальная схема с неполной факторизацией LU(sq)
 pair<int, double> SOLVER::LOSfactLUsq() {
 
-	quantityOfActions = 0;
-
 	x.clear();						// Задаём начальное приближение
 	x.resize(n, 0);					// x_0 = (0, 0, ...)
-	xprev = x;
+	vector1D xprev = x;
 	decomposionLUsq();
 
 	r = b - multA(x);				// r_0 = b - A*x_0
@@ -322,7 +311,6 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 	for (int i = 0; i < maxiter; ++i) {
 
-		quantityOfActions += 18 * n;
 		double pp = p * p;
 		double alpha = (p*r) / pp;
 		x = x + alpha * z;
@@ -339,9 +327,7 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
-		quantityOfActions += 2 * n;
 		if (x == xprev || relativeDiscrepancy < E) {
-			cout << quantityOfActions << endl;
 			return make_pair(i, relativeDiscrepancy);
 		}
 		xprev = x;
@@ -391,7 +377,7 @@ void SOLVER::initSLAE()
 
 
 // Метод бисопряжённых градиентов
-void SOLVER::BiCG()
+pair<int, double> SOLVER::BiCG()
 {
 	ofstream fout("output/result.txt");
 	int i = 0;
@@ -420,10 +406,8 @@ void SOLVER::BiCG()
 		i++;
 	} while (!doStop(i));
 
-	fout << x << endl
-		<< "Iterations: " << i;
-
 	fout.close();
+	return make_pair(i, calcRelativeDiscrepancy());
 }
 
 

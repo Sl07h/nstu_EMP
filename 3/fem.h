@@ -22,7 +22,7 @@ public:
 		int _coefGrid,
 		int _coefTime
 	);
-	void solve();
+	pair<int, double> solve(int solver);
 	inline int getNodesCount() { return nodesCount; }
 	void convAToDense();
 	void outputA();
