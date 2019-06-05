@@ -56,6 +56,11 @@ margin=2cm
 
 \DeclareMathOperator{\sign}{sign}
 
+% Собственные обозначения для скобок
+\newcommand{\roubr}[1]{\left(#1\right)}  % round  brackets ()
+\newcommand{\sqbr}[1]{\left[#1\right]}   % sqaure brackets [] 
+\newcommand{\cubr}[1]{\left\{#1\right\}} % curtly brackets {}
+
 \newcommand{\insertTitle}[5]{
 \begin{titlepage}
 	\begin{center}
@@ -96,16 +101,16 @@ margin=2cm
 \newcommand{\inputTable}[1]{
 \begin{center}
 \noindent\footnotesize\pgfplotstabletypeset[
-	columns={a,$1$,$u+x+1$,$u^2$,$u^2+1$,$u^3$,$u^4$,$e^u$,sinu},
-	columns/a/.style={string type, column name={\backslashbox{$u(x, t)$}{$\lambda(u)$}}},
+	columns={a,$1$,$t$,$t^2$,$t^3$,$t^4$,$t^5$,$sin(t)$,$e^t$},
+	columns/a/.style={string type, column name={\backslashbox{$space(x, y)$}{$time(t)$}}},
 	columns/$1$/.style={string type},
-	columns/$u+x+1$/.style={string type},
-	columns/$u^2$/.style={string type},
-	columns/$u^2+1$/.style={string type},
-	columns/$u^3$/.style={string type},
-	columns/$u^4$/.style={string type},
-	columns/$e^u$/.style={string type},
-	columns/sinu/.style={string type, column name={$\sin u$}, column type/.add={}{|},},
+	columns/$t$/.style={string type},
+	columns/$t^2$/.style={string type},
+	columns/$t^3$/.style={string type},
+	columns/$t^4$/.style={string type},
+	columns/$t^5$/.style={string type},
+	columns/$sin(t)$/.style={string type},
+	columns/$e^t$/.style={string type, column type/.add={}{|}},
 	every head row/.style={before row=\hline,after row=\hline}, 
 	every last row/.style={after row=\hline},
 	column type/.add={|},
@@ -227,14 +232,69 @@ margin=2cm
 
 Дано гиперболическое уравнение в декартовой системе координат:
 
-\[ -div (\lambda grad u) + \gamma u + \sigma \frac{du}{dt}  + \chi \frac{d^2u}{dt^2} = f \]
-
+\begin{aligned}
+div (\lambda grad u) + \gamma u + \sigma \frac{du}{dt}  + \chi \frac{d^2u}{dt^2} &= f \\[5pt]
+\end{aligned}
 
 \subsection{Дискретизация по времени}
+
+
 
 \subsection{Вариационная подстановка}
 
 \subsection{Конечноэлементная дискретизация}
+
+Представим искомое решение u на интервале (t_{j-3}, t_j) в следующем виде:
+
+u(x,y,t) = u^{j-3}\eta_3^j(t) + u^{j-2}\eta_2^j(t) + u^{j-1}\eta_1^j(t) +u^{j-0}\eta_0^j(t)
+
+где функции $\eta_\nu^j(t)$ являются базисными кубическими полиномами Лагранжа и имеют следующий вид
+
+\begin{aligned}
+\eta_3^j(t) &= \frac{(t - t_{j-2})(t - t_{j-1})(t - t_j)} {(t_{j-3} - t_{j-2})(t_{j-3} - t_{j-1})(t_{j-3} - t_{j})} \\[5pt]
+\eta_2^j(t) &= \frac{(t - t_{j-3})(t - t_{j-1})(t - t_j)} {(t_{j-2} - t_{j-3})(t_{j-2} - t_{j-1})(t_{j-2} - t_{j})} \\[5pt]
+\eta_1^j(t) &= \frac{(t - t_{j-2})(t - t_{j-2})(t - t_j)} {(t_{j-1} - t_{j-3})(t_{j-1} - t_{j-2})(t_{j-1} - t_{j})} \\[5pt]
+\eta_0^j(t) &= \frac{(t - t_{j-3})(t - t_{j-2})(t - t_{j-1})} {(t_{j} - t_{j-3})(t_{j} - t_{j-2})(t_{j} - t_{j-1})} \\[5pt]
+\end{aligned}
+
+Возьмём первые и вторые производные от полиномов Лагранжа в точке $t=t_j$ (т.к. схема неявная)
+
+\begin{center}
+\begin{tabular}{ | c | c | c | c |}
+\hline
+  & полином Лагранжа & 1ая производная & 2ая производная \\ \hline  
+\eta_3^j(t) & \parbox{4.3cm}{\[ \frac{t_{02} t_{01} t_{00}}{t_{23} t_{13} t_{03}} \] } & \parbox{4.3cm}{\[ -\frac{t_{01} t_{02}}{t_{23} t_{13} t_{03}} \] } & \parbox{4.3cm}{\[ -2 \cdot \frac{t_{01} + t_{02}}{t_{23} t_{13} t_{03}} \] } \\[5pt] \hline
+
+\eta_2^j(t) & \parbox{4.3cm}{\[ \frac{t_{03} t_{01} t_{00}}{t_{23} t_{12} t_{02}} \] } & \parbox{4.3cm}{\[ \frac{t_{01} t_{03}}{t_{23} t_{12} t_{02}} \] } & \parbox{4.3cm}{\[ 2 \cdot \frac{t_{01} + t_{03}}{t_{23} t_{12} t_{02}} \] } \\[5pt] \hline  
+
+\eta_1^j(t) & \parbox{4.3cm}{\[ \frac{t_{03} t_{02} t_{00}}{t_{13} t_{12} t_{01}} \] } & \parbox{4.3cm}{\[ -\frac{t_{02} t_{03}}{t_{13} t_{12} t_{01}} \] } & \parbox{4.3cm}{\[ -2 \cdot \frac{t_{02} + t_{03}}{t_{13} t_{12} t_{01}} \] } \\[5pt] \hline  
+
+\eta_0^j(t) & \parbox{4.3cm}{\[ \frac{t_{03} t_{02} t_{01}}{t_{03} t_{02} t_{01}} \] } & \parbox{4.3cm}{\[ \frac{t_{01}t_{02} + t_{01}t_{03} + t_{02}t_{03}}{t_{03} t_{02} t_{01}} \] } & \parbox{4.3cm}{\[ 2 \cdot \frac{t_{01} + t_{02} + t_{03}}{t_{03} t_{02} t_{01}} \] } \\[5pt] \hline  
+\end{tabular} 
+\end{center}
+
+где:
+
+\begin{aligned}
+t_{01} &= t_0 - t_1, t_0 = t_j, t_1 = t_{j-1}, \\[7pt]
+t_{02} &= t_0 - t_2, t_0 = t_j, t_2 = t_{j-2}, \\[7pt]
+\end{aligned}
+
+... \\[5pt]
+
+Подставим их в исходное уравнение, а затем выведем из него 4-х слойную неявную схему:
+
+\[ \roubr{\sqbr{2\chi \frac{t_{01} + t_{02} + t_{03}}{t_{03} t_{02} t_{01}} + \sigma \frac{t_{01}t_{02} + t_{01}t_{03} + t_{02}t_{03}}{t_{03} t_{02} t_{01}} + \gamma}M + G} q^j = b^j \\[7pt]
+\]
+
+\[ &+ \sqbr{2\chi \frac{t_{01}+t_{02}}{t_{03}t_{13}t_{23}} + \sigma \frac{t_{01}t_{02}}{t_{03}t_{13}t_{23}}}Mq^{j-3} \\[7pt]
+\]
+
+\[ &- \sqbr{2\chi \frac{t_{01}+t_{t03}}{t_{02}t_{12}t_{23}} + \sigma \frac{t_{01}t_{t03}}{t_{02}t_{12}t_{23}}}Mq^{j-2} \\[7pt]
+\]
+
+\[ &+ \sqbr{2\chi \frac{t_{02}+t_{03}}{t_{01}t_{12}t_{13}} + \sigma \frac{t_{02}+t_{03}}{t_{01}t_{12}t_{13}}}Mq^{j-1} 
+\]
 
 \subsection{Локальные матрицы и вектора}
 Аналитические выражения для вычисления элементов локальных матриц:
@@ -273,6 +333,7 @@ f_1 \\ f_2 \\ f_3 \\ f_4
 
 
 
+
 \subsection{Решатели}
 
 Для решения полученных СЛАУ использовались следующие методы:
@@ -284,7 +345,44 @@ f_1 \\ f_2 \\ f_3 \\ f_4
 \end{itemize}
 
 
+%-------------------------------------------------------------------------------
+\section{Исследования}
 
+Проверим сходимость метода на разных функциях
+
+
+
+Равномерная сетка по пространству
+
+Равномерная сетка по времени
+
+\inputTable{table_11.txt}
+
+
+
+Равномерная сетка по пространству
+
+Неравномерная сетка по времени
+
+\inputTable{table_10.txt}
+
+
+Неравномерная сетка по пространству
+
+Равномерная сетка по времени
+
+\inputTable{table_01.txt}
+
+
+Неравномерная сетка по пространству
+
+Неравномерная сетка по времени
+
+\inputTable{table_00.txt}
+
+\subsection{Вывод}
+
+Если порядок полинома по пространству не превышает порядка используемых базисных функций, а порядок полинома по времени не соответсвует порядку точности используемой временной схемы, то получаемое численное решение должно полностью совпадать с точным решением задачи.
 
 
 %-------------------------------------------------------------------------------

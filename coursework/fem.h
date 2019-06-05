@@ -19,7 +19,7 @@ public:
 		int _coefGrid,
 		int _coefTime
 	);
-	void solve();
+	double solve();
 	void solveParabolic();
 	inline int getNodesCount() { return nodesCount; }
 	void convAToDense();

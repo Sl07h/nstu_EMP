@@ -100,7 +100,7 @@ void FEM::init(
 	coefTime = _coefTime;
 }
 
-void FEM::solve()
+double FEM::solve()
 {
 	n = nodesCount;
 
@@ -161,6 +161,7 @@ void FEM::solve()
 		//cout << endl << "q:" << endl << q << endl;
 		cout << endl << "Residual: " << endl << calcNormAtMainNodes(q, t0);
 	}
+	return calcNormAtMainNodes(q, t0);
 }
 
 
