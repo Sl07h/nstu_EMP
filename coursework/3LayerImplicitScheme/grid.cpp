@@ -223,23 +223,6 @@ void GRID::buildGrid()
 			nodes[elem].border = 4;
 			y += dy;
 		}
-
-		//double x;
-		//size_t i, elem;
-
-		//i = 1;
-		//dx = hx * kx;
-		//x = xLeft + hx;
-		//// Первый элемент
-		//nodes[0].setNodesData(xLeft, 0, 1, coefGrid);
-		//for (elem = 1; elem < width; elem++, i++, dx *= kx)
-		//{
-		//	nodes[elem].setNodesData(x, i, 0, coefGrid);
-		//	nodes[elem].border = 0;
-		//	x += dx;
-		//}
-		//// Последний элемент
-		//nodes[nodesCount - 1].setNodesData(xRight, width, 1, coefGrid);
 	}
 }
 
@@ -249,14 +232,15 @@ void GRID::buildTimeGrid()
 	//  tFirst         tLast
 	//	  *-------------*
 	//    0    tCount   1
-	times.resize(tCount);
+	
 
 	if (isTimeUniform) {
 
 		ht = ((tLast - tFirst) / double(tCount - 1)) / pow(2, coefTime);
 		if (coefTime != 0)
-			width = (width - 1) * pow(2, coefTime) + 1;
+			tCount = (tCount - 1) * pow(2, coefTime) + 1;
 
+		times.resize(tCount);
 		size_t i, elem;
 		double t;
 		// Первый элемент
@@ -272,11 +256,11 @@ void GRID::buildTimeGrid()
 	else {
 
 		if (coefTime != 0) {
-			width = (width - 1) * pow(2, coefTime) + 1;
+			tCount = (tCount - 1) * pow(2, coefTime) + 1;
 			nt *= pow(2, coefTime);
 			kt *= pow(kt, 1.0 / coefTime);
 		}
-
+		times.resize(tCount);
 		ht = (tLast - tFirst) * (1 - kt) / (1 - pow(kt, nt));
 		double t;
 		size_t i, elem;
