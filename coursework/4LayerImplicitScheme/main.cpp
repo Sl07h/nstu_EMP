@@ -105,15 +105,15 @@ void main() {
 	};
 
 
-	// Исследование сходимости метода на различных функциях по времени и пространству
-	auto reseacrhConvergence = [&](bool isGridUniform, bool isTimeUniform) {
+	// Исследование работы метода на различных функциях по времени и пространству
+	auto researchTable = [&](bool isGridUniform, bool isTimeUniform) {
 		ofstream table1("report/table_" + to_string(isGridUniform) + to_string(isTimeUniform) + ".txt");
 		table1 << setprecision(2) << scientific;
 		table1 << "a\t$1$\t$t$\t$t^2$\t$t^3$\t$t^4$\t$t^5$\t$sin(t)$\t$e^t$" << endl;
-		for (size_t i = 0; i < 8; i++)
+		for (size_t i = 0; i < u_x.size(); i++)
 		{
 			table1 << u_x_names[i] << "\t";
-			for (size_t j = 0; j < 8; j++)
+			for (size_t j = 0; j < u_x.size(); j++)
 			{
 				int k = 8 * i + j;
 				u[k] = sum_u(u_x[i], u_t[j], lambda, gamma, sigma, chi);
@@ -125,7 +125,7 @@ void main() {
 				fem.buildGrid();
 				fem.inputTime();
 				fem.buildTimeGrid();
-				if (j != 7)
+				if (j + 1 != u_x.size())
 					table1 << fem.solve() << "\t";
 				else
 					table1 << fem.solve() << endl;
@@ -137,9 +137,49 @@ void main() {
 		}
 		table1.close();
 	};
-	reseacrhConvergence(true, true);
-	reseacrhConvergence(true, false);
-	reseacrhConvergence(false, true);
-	reseacrhConvergence(false, false);
+	cout << "Research Table 1 1" << endl;
+	researchTable(true, true);
+	cout << "Research Table 1 0" << endl;
+	researchTable(true, false);
+	cout << "Research Table 0 1" << endl;
+	researchTable(false, true);
+	cout << "Research Table 0 0" << endl;
+	researchTable(false, false);
+
+
+
+// Исследование сходимости метода на различных функциях по времени и пространству
+	auto researchConvergence = [&](bool isGridUniform, bool isTimeUniform) {
+		for (size_t i = 0; i < u_x.size(); i++)
+		{
+			ofstream fout("report/file_u" + to_string(i) + "." + to_string(isGridUniform) + to_string(isTimeUniform) + ".txt");
+			fout << scientific << setprecision(3);
+			fout << "i\tnodes\tnorm\n";
+			for (int coef = 0; coef < 3; coef++)
+			{
+				u[i] = sum_u(u_x[i], u_t[i], lambda, gamma, sigma, chi);
+				f[i] = calc_f(u[i], lambda, gamma, sigma, chi);
+
+				FEM fem;
+				fem.init(u[i], f[i], lambda, gamma, sigma, chi, isGridUniform, isTimeUniform, coef, coef);
+				fem.inputGrid();
+				fem.buildGrid();
+				fem.inputTime();
+				fem.buildTimeGrid();
+				fout << coef << "\t"
+					<< fem.getNodesCount() << "\t"
+					<< fem.solve() << endl;
+			}
+		}
+	};
+
+	researchConvergence(true, true);
+	cout << "Research 2.1: convergence with grid crushing" << endl;
+	researchConvergence(true, false);
+	cout << "Research 2.2: convergence with grid crushing" << endl;
+	researchConvergence(false, true);
+	cout << "Research 2.3: convergence with grid crushing" << endl;
+	researchConvergence(false, false);
+	cout << "Research 2.4: convergence with grid crushing" << endl;
 
 }
