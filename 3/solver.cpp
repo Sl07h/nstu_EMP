@@ -214,7 +214,7 @@ double SOLVER::calcRelativeDiscrepancy() {
 
 
 // Локально - оптимальная схема
-pair<int, double> SOLVER::LOS() {
+int SOLVER::LOS() {
 
 	x.clear();			// Задаём начальное приближение
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
@@ -243,7 +243,7 @@ pair<int, double> SOLVER::LOS() {
 
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			return make_pair(i, relativeDiscrepancy);
+			return i;
 		}
 		xprev = x;
 	}
@@ -251,7 +251,7 @@ pair<int, double> SOLVER::LOS() {
 
 
 // Локально - оптимальная схема c неполной диагональной факторизацией
-pair<int, double> SOLVER::LOSfactD() {
+int SOLVER::LOSfactD() {
 
 	x.clear();			// Задаём начальное приближение
 	x.resize(n, 0);		// x_0 = (0, 0, ...)
@@ -284,7 +284,7 @@ pair<int, double> SOLVER::LOSfactD() {
 
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			return make_pair(i, relativeDiscrepancy);
+			return i;
 		}
 		xprev = x;
 	}
@@ -295,7 +295,7 @@ pair<int, double> SOLVER::LOSfactD() {
 
 
 // Локально - оптимальная схема с неполной факторизацией LU(sq)
-pair<int, double> SOLVER::LOSfactLUsq() {
+int SOLVER::LOSfactLUsq() {
 
 	x.clear();						// Задаём начальное приближение
 	x.resize(n, 0);					// x_0 = (0, 0, ...)
@@ -328,7 +328,7 @@ pair<int, double> SOLVER::LOSfactLUsq() {
 
 		double relativeDiscrepancy = calcRelativeDiscrepancy();
 		if (x == xprev || relativeDiscrepancy < E) {
-			return make_pair(i, relativeDiscrepancy);
+			return i;
 		}
 		xprev = x;
 	}
@@ -377,7 +377,7 @@ void SOLVER::initSLAE()
 
 
 // Метод бисопряжённых градиентов
-pair<int, double> SOLVER::BiCG()
+int SOLVER::BiCG()
 {
 	ofstream fout("output/result.txt");
 	int i = 0;
@@ -407,7 +407,7 @@ pair<int, double> SOLVER::BiCG()
 	} while (!doStop(i));
 
 	fout.close();
-	return make_pair(i, calcRelativeDiscrepancy());
+	return i;
 }
 
 

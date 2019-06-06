@@ -61,7 +61,7 @@ void GRID::buildGrid()
 
 	nodesCount = width;
 	finiteElementsCount = nodesCount - 1;
-	nodes.resize(width);
+	nodes.resize(2 * nodesCount);
 
 	if (isGridUniform) {
 

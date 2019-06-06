@@ -23,10 +23,10 @@ public:
 	vector1D execDirectTraversal(const vector1D &_F);
 	vector1D execReverseTraversal(const vector1D &_y);
 
-	pair<int, double> LOS();
-	pair<int, double> LOSfactD();
-	pair<int, double> LOSfactLUsq();
-	pair<int, double> BiCG();
+	int LOS();
+	int LOSfactD();
+	int LOSfactLUsq();
+	int BiCG();
 	void clearAll();
 	void setMaxiter(int new_maxiter) { maxiter = new_maxiter; }
 	void setE(double new_E) { E = new_E; }

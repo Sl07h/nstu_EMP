@@ -82,7 +82,9 @@ void main() {
 		"$e^x$",
 	};
 
-	ofstream foutTable("report/table.txt");
+
+	/*
+	ofstream foutTable("report/table1.txt");
 	foutTable << scientific << setprecision(2);
 	foutTable << "a\t$1$\t$x$\t$x^2$\t$x^3$\t$x^4$\t$x^5$\t$sin(x)$\t$e^x$" << endl;
 	cout << "Research 1: convergence with diferent u_s and u_c" << endl;
@@ -108,25 +110,56 @@ void main() {
 		}
 	}
 	cout << endl;
+	foutTable.close();
+
+
+	foutTable.open("report/table2.txt");
+	foutTable << scientific << setprecision(2);
+	foutTable << "a\t$1$\t$x$\t$x^2$\t$x^3$\t$x^4$\t$x^5$\t$sin(x)$\t$e^x$" << endl;
+	cout << "Research 1: convergence with diferent u_s and u_c" << endl;
+	for (size_t i = 0; i < u_s.size(); i++)
+	{
+		foutTable << u_s_names[i] << "\t";
+		for (size_t j = 0; j < u_c.size(); j++)
+		{
+			std::cout << int(float(i*u_c.size() + j) * 100.0 / (u_s.size()*u_c.size())) << " %\r";
+			f_s[i] = calc_f_s(u_s[i], u_c[i], lambda, sigma, omega, hi);
+			f_c[j] = calc_f_c(u_s[i], u_c[i], lambda, sigma, omega, hi);
+
+			FEM fem;
+			fem.init(u_s[i], u_c[j], f_s[i], f_c[j], lambda, sigma, omega, hi, true, true, 1, 0, 0);
+			fem.inputGrid();
+			fem.buildGrid();
+			result = fem.solve(2);
+
+			if (j + 1 == u_c.size())
+				foutTable << result.second << endl;
+			else
+				foutTable << result.second << "\t";
+		}
+	}
+	cout << endl;
+	foutTable.close();
+	*/
 
 
 
 	// Исследование точности при дроблении сетки
-	auto reseacrhConvergence = [&](bool isGridUniform, bool isTimeUniform) {
+	auto reseacrhConvergence = [&](bool isGridUniform, bool isTimeUniform, int solver) {
 		for (int i = 0; i < u_s.size(); i++) {
 			f_s[i] = calc_f_s(u_s[i], u_c[i], lambda, sigma, omega, hi);
 			f_c[i] = calc_f_c(u_s[i], u_c[i], lambda, sigma, omega, hi);
 
-			ofstream fout("report/file_u" + to_string(i) + "." + to_string(isGridUniform) + to_string(isTimeUniform) + ".txt");
+			ofstream fout("report/file_u" + to_string(i) + "." + to_string(solver) + "." + to_string(isGridUniform) + to_string(isTimeUniform) + ".txt");
 			fout << scientific << setprecision(3);
 			fout << "i\tnodes\titers\tnorm\n";
-			for (int coefGrid = 0; coefGrid < 5; coefGrid++)
+			for (int coefGrid = 0; coefGrid < 8; coefGrid++)
 			{
 				FEM fem;
 				fem.init(u_s[i], u_c[i], f_s[i], f_c[i], lambda, sigma, omega, hi, isGridUniform, isTimeUniform, 1, coefGrid, 0);
 				fem.inputGrid();
 				fem.buildGrid();
-				result = fem.solve(1);
+				result = fem.solve(solver);
 				fout << coefGrid << "\t"
 					<< fem.getNodesCount() << "\t"
 					<< result.first << "\t"
@@ -137,13 +170,46 @@ void main() {
 	};
 
 
-	reseacrhConvergence(true, true);
+	/*reseacrhConvergence(true, true, 1);
 	cout << "Research 2.1: convergence with grid crushing" << endl;
-	reseacrhConvergence(true, false);
+	reseacrhConvergence(true, false, 1);
 	cout << "Research 2.2: convergence with grid crushing" << endl;
-	reseacrhConvergence(false, true);
+	reseacrhConvergence(false, true, 1);
 	cout << "Research 2.3: convergence with grid crushing" << endl;
-	reseacrhConvergence(false, false);
+	reseacrhConvergence(false, false, 1);
 	cout << "Research 2.4: convergence with grid crushing" << endl;
 
+
+	reseacrhConvergence(true, true, 2);
+	cout << "Research 3.1: convergence with grid crushing" << endl;
+	reseacrhConvergence(true, false, 2);
+	cout << "Research 3.2: convergence with grid crushing" << endl;
+	reseacrhConvergence(false, true, 2);
+	cout << "Research 3.3: convergence with grid crushing" << endl;
+	reseacrhConvergence(false, false, 2);
+	cout << "Research 3.4: convergence with grid crushing" << endl;*/
+
+
+	vector1D sigmas = { 0, 1e+1, 1e+2 , 1e+3 , 1e+4, 1e+5, 1e+6, 1e+7, 1e+8 };
+
+	for (double _omega = 1e-4; _omega <= 1e+9; _omega *= 10)
+	{
+		for (double _lambda = 1e+2; _lambda <= 8e+5; _lambda *= 10)
+		{
+
+			for (auto _sigma : sigmas)
+			{
+				for (double _chi = 1e-12; _chi <= 1e-10; _chi*=10)
+				{
+					FEM fem;
+					fem.init(u_s[2], u_c[2], f_s[2], f_c[2], _lambda, _sigma, _omega, _chi, true, true, 1, 0, 0);
+					fem.inputGrid();
+					fem.buildGrid();
+					result = fem.solve(2);
+					cout << result.first << "\t"
+						<< result.second << endl;
+				}
+			}
+		}
+	}
 }

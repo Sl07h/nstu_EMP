@@ -89,18 +89,18 @@ void FEM::init(
 
 pair<int, double> FEM::solve(int solver)
 {
-	pair<int, double> result;
-	n = 2 * nodesCount;
+	int i;
+	n = nodesCount * 2;
 	buildGlobalMatrixA();
 	buildGlobalVectorb();
 
 	switch (solver)
 	{
 	case 1:
-		result = LOSfactLUsq();
+		i = LOSfactLUsq();
 		break;
 	case 2:
-		result = BiCG();
+		i = BiCG();
 		break;
 	case 3:
 		//result = BiCG();
@@ -108,7 +108,7 @@ pair<int, double> FEM::solve(int solver)
 	default:
 		break;
 	}
-	return result;
+	return make_pair(i, calcNormAtMainNodes(x));
 }
 
 
@@ -123,12 +123,6 @@ void FEM::buildGlobalMatrixA()
 	di.clear();
 	au.clear();
 	al.clear();
-	/*A.clear();
-	A.resize(2 * nodesCount, 0);
-	for (size_t i = 0; i < 2 * nodesCount; i++)
-	{
-		A[i].resize(2 * nodesCount, 0);
-	}*/
 
 	di.resize(2 * nodesCount, 0);
 	ia.resize(2 * nodesCount + 1);
